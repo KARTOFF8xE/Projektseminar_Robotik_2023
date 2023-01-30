@@ -72,24 +72,37 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
     }
     RCLCPP_INFO_ONCE(logger, "[rgb image] Got first callback.");
 
+    //get image from msg
     filters::encoding_info_t image_encoding = filters::get_encoding_info(msg->encoding);
     cv::Mat image(msg->height, msg->width, image_encoding.type, &(msg->data[0]), msg->step);
     if (image_encoding.conversion != cv::COLOR_COLORCVT_MAX) { //convert to BGR/BGRA if not already so
         cv::cvtColor(image, image, image_encoding.conversion);
     }
 
-    cv::Mat warped, image_copy;
-    image.copyTo(image_copy);
-    cv::Size size = image.size();
+    //convert camera view to top down
+    cv::Mat warped_image, transformation_matrix;
+    std::vector<cv::Point2i> trapeze;
 
+    cv::Size image_size = image.size();
     cv::Vec3d euler_angles = this->euler_angles.value();
-    cv::Point2d vanishing_point = src::get_vanishing_point(this->K, euler_angles[0] - M_PI, euler_angles[1] + M_PI_2);
-    std::vector<cv::Point2i> trapeze = src::get_transformation_points(size, vanishing_point);
-    src::draw_vanishing_lines(image_copy, vanishing_point, trapeze);
-    src::transform_to_top_down(image, warped, trapeze, size);
+    cv::Point2d vanishing_point = src::getVanishingPoint(this->K, euler_angles[0] - M_PI, euler_angles[1] + M_PI_2);
+    if (!src::getTransformation(transformation_matrix, trapeze, image_size, vanishing_point)) {
+        RCLCPP_WARN(logger, "Could not find transformation matrix.");
+        return;
+    }
+    
+    src::transformToTopDown(image, warped_image, transformation_matrix, image_size);
 
-    cv::imshow("image", image_copy);
-    cv::imshow("warped", warped);
+    RCLCPP_INFO(logger, "euler angles (adjusted): pan=%.2f tilt=%.2f", euler_angles[0] - M_PI, euler_angles[1] + M_PI_2);
+    RCLCPP_INFO(logger, "vanishing point: (%.2f|%.2f)", vanishing_point.x, vanishing_point.y);
+    RCLCPP_INFO(logger, "K:");
+    RCLCPP_INFO_STREAM(logger, this->K);
+
+    //display
+    src::drawVanishingLines(image, vanishing_point, trapeze);
+
+    cv::imshow("image", image);
+    cv::imshow("warped", warped_image);
     if (cv::waitKey(10) == 27) { //ESC
         RCLCPP_DEBUG(logger, "Exiting node upon user request.");
         exit(0);
