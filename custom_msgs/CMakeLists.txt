@@ -15,12 +15,16 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 #generate specified messages
 set(MESSAGES "")
 list(APPEND MESSAGES "msg/Distance.msg")
 
-rosidl_generate_interfaces(${PROJECT_NAME} ${MESSAGES})
+rosidl_generate_interfaces(
+  ${PROJECT_NAME}
+  ${MESSAGES}
+  DEPENDENCIES builtin_interfaces std_msgs)
 
 ament_package()
