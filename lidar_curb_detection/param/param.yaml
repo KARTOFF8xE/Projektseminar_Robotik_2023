@@ -1,0 +1,29 @@
+lidar_curb_detection:
+  ros__parameters:
+    _: null #placeholder/dummy
+    # topics:
+    #   subscribe_topic:  
+    #   publish_topic:
+    # robot_specific:
+    #   wheel_inside:                 # Width of the Wheels   
+    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
+    #   #mounting_angle:   30          # The Mounting-Angle of the LiDAR
+    # filter:
+    #   distance_thr:                 # Filter: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    #   quantity_check:               # Filter: Amount of Limits that is checked in each direction (before and behind)
+    #   quantity_thr:                 # Filter: Minimum amount of valid Points that needs to lay inside the distance_thr
+    # avg_dist:
+    #   quantity_check:               # avg_dist: Amount of Limits that is checked in each direction (before and behind)
+    #   counter_thr:                  # avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
+    #   avg_dist_thr:                 # avg_dist: distance-averages below this Threshold are validating the Limit
+    # island:
+    #   quantity_check:               # island: Amount of Limits that is checked in each direction (before and behind)
+    #   counter_thr:                  # island: Needed Quantity of Valid Limits to validate the looked up Limit
+    # detection_thr:
+    #   angle_thr:                    # detection: Minimum angle between two Vectors that is needed to detect a Curbstone 
+    #   height_diff:                  # detection: Height_Difference that must exist, to detect a Curbstone
+    #   advanced_ray_check_thr:       # detection: Distance a possible Curbstone should be proofed, that it isn't a Pothole           
+    #   max_check_length:             # detection: Quantity of Rays that should be checked for a Curbstone    
+    # smoothing:
+    #   quantity_thr:                 # Smoother: The amount of Points (in each direction) that is taken to calculate the average of a new Point
+    #   repetitions:                  # Smoother: How often the Height_line should be smoothed

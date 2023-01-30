@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>decider</name>
+  <version>0.0.0</version>
+  <description>Decider - module for path-width</description>
+  <maintainer email="Johannes-Georg.Kohl@student.tu-freiberg.de">Johannes Kohl</maintainer>
+  <maintainer email="Georg.Muck@student.tu-freiberg.de">Georg Muck</maintainer>
+  <maintainer email="Nico-Paul-Rene.Zumpe@student.tu-freiberg.de">Nico Zumpe</maintainer>
+  <license>WTFPL</license>
+  
+  <depend>custom_msgs</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

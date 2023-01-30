@@ -1,0 +1,24 @@
+#depth image
+header:
+  stamp:
+    sec: 1668067943
+    nanosec: 6168662
+  frame_id: zed2i_c1_left_camera_optical_frame
+height: 720
+width: 1280
+encoding: 32FC1
+is_bigendian: 0
+step: 5120
+
+
+#rgb image
+header:
+  stamp:
+    sec: 1668067921
+    nanosec: 871399662
+  frame_id: zed2i_c1_left_camera_optical_frame
+height: 720
+width: 1280
+encoding: bgra8
+is_bigendian: 0
+step: 5120

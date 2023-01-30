@@ -1,0 +1,212 @@
+import os
+import yaml
+import typing
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import ExecuteProcess, DeclareLaunchArgument, Shutdown, LogInfo
+from launch.conditions import IfCondition, LaunchConfigurationNotEquals
+from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration, PythonExpression
+
+#the following are package specific
+PKG_NAME = "wayfinding";
+FLUX_TOPIC_MAP = {
+    "camera_info": "/zed2i_c1/zed_node_c1/rgb/camera_info",
+    "imu":         "/imu/data",
+    "depth_info":  "/zed2i_c1/zed_node_c1/depth/depth_info",
+    "pointcloud":  "/zed2i_c1/zed_node_c1/point_cloud/cloud_registered",
+    "rgb_image":   "/zed2i_c1/zed_node_c1/rgb/image_rect_color",
+    "depth_image": "/zed2i_c1/zed_node_c1/depth/depth_registered"
+};
+DMC_TOPIC_MAP = {
+};
+PUB_TOPIC = "/path_width";
+
+#topic loader in case the parameter file specifies different topics
+def load_topics(param_path: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str], pub_topic: str) -> typing.Tuple[typing.List[str] , typing.List[str], str]:
+    with open(param_path, 'r') as param_yaml:
+        params: dict = yaml.safe_load(param_yaml)[PKG_NAME]["ros__parameters"];
+
+    if "topics" not in params:
+        return list(flux_topic_map.values()), list(dmc_topic_map.values()), pub_topic;
+
+    topics = params["topics"];
+    if "flux" in topics: flux_topic_map.update(topics["flux"]);
+    if "dmc" in topics: dmc_topic_map.update(topics["dmc"]);
+    if "pub" in topics: pub_topic = topics["pub"];
+
+    return list(flux_topic_map.values()), list(dmc_topic_map.values()), pub_topic;    
+
+def generate_launch_description() -> LaunchDescription:
+    bag_dir = LaunchConfiguration("bag_dir");
+    flux = LaunchConfiguration("flux");
+    dmc = LaunchConfiguration("dmc");
+    log_level = LaunchConfiguration("log_level");
+    use_gdb = LaunchConfiguration("use_gdb");
+    echo_output = LaunchConfiguration("echo_output");
+
+    global_exit = Shutdown(reason="One or more components failed.");
+
+    param_path = os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml");
+    flux_topics, dmc_topics, pub_topic = load_topics(param_path, FLUX_TOPIC_MAP.copy(), DMC_TOPIC_MAP.copy(), PUB_TOPIC);
+
+    ld = LaunchDescription(
+        (
+            DeclareLaunchArgument(
+                "bag_dir",
+                default_value=os.getcwd(),
+                description="Specify the bag folder if the bags are not in the cwd."
+            ),
+            DeclareLaunchArgument(
+                "flux",
+                default_value='',
+                description="Playback flux ros2 bag file."
+            ),
+            DeclareLaunchArgument(
+                "dmc",
+                default_value='',
+                description="Playback dmc_11 ros2 bag file."
+            ),
+            DeclareLaunchArgument(
+                "log_level",
+                default_value='info',
+                choices=["debug", "info", "warn", "error", "fatal"],
+                description="Set log level to node logger."
+            ),
+            DeclareLaunchArgument(
+                "use_gdb",
+                default_value="False",
+                choices=["True", "False"],
+                description = "Use gdb for debugging."
+            ),
+            DeclareLaunchArgument(
+                "echo_output",
+                default_value="False",
+                choices=["True", "False"],
+                description="Echo a specified topic automatically."
+            )
+        )
+    );
+
+    if flux_topics:
+        ld.add_entity(
+            LogInfo(
+                condition=LaunchConfigurationNotEquals(
+                    "flux", ''
+                ),
+                msg="flux topics: " + ", ".join(flux_topics)
+            )
+        )
+        ld.add_entity(
+            ExecuteProcess(
+                condition=LaunchConfigurationNotEquals(
+                    "flux", ''
+                ),
+                on_exit=[global_exit],
+
+                name="flux_bag",
+
+                cwd=bag_dir,
+                cmd=[
+                    "ros2", "bag",  "play",
+                    flux,
+                    "--loop",
+                    "--topics"
+                ] + flux_topics,
+
+                output="screen",
+                emulate_tty=True,
+                shell=True
+            )
+        );
+
+    if dmc_topics:
+        ld.add_entity(
+            LogInfo(
+                condition=LaunchConfigurationNotEquals(
+                    "dmc", ''
+                ),
+                msg="dmc topics: " + ", ".join(dmc_topics)
+            )
+        )
+        ld.add_entity(
+            ExecuteProcess(
+                condition=LaunchConfigurationNotEquals(
+                    "dmc", ''
+                ),
+                on_exit=[global_exit],
+
+                name="dmc_bag",
+
+                cwd=bag_dir,
+                cmd=[
+                    "ros2", "bag",  "play",
+                    dmc,
+                    "--loop",
+                    "--topics"
+                ] + dmc_topics,
+
+                output="screen",
+                emulate_tty=True,
+                shell=True
+            )
+        );
+
+    ld.add_entity(
+        Node(
+            condition=IfCondition(
+                use_gdb
+            ),
+            on_exit=[global_exit],
+
+            package=PKG_NAME,
+            executable=PKG_NAME,
+            parameters=[param_path],
+            arguments=["--ros-args", "--log-level", log_level],
+
+            prefix=["gnome-terminal --wait -- gdb --args"],
+            output="screen",
+            emulate_tty=True,
+            shell=True
+        )
+    );
+    ld.add_entity(
+        Node(
+            condition=IfCondition(
+                PythonExpression([
+                    "not ", use_gdb
+                ])
+            ),
+            on_exit=[global_exit],
+
+            package=PKG_NAME,
+            executable=PKG_NAME,
+            parameters=[param_path],
+            arguments=["--ros-args", "--log-level", log_level],
+
+            output="screen",
+            emulate_tty=True,
+            shell=True
+        )
+    );
+
+    if pub_topic:
+        ld.add_entity(
+            ExecuteProcess(
+                condition=IfCondition(
+                    echo_output
+                ),
+                on_exit=[global_exit],
+
+                name="echo_output",
+
+                cmd=["ros2", "topic",  "echo", pub_topic],
+
+                output="screen",
+                emulate_tty=True,
+                shell=True
+            )
+        );
+
+    return ld
