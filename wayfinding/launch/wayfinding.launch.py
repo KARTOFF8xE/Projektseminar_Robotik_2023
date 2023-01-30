@@ -165,7 +165,7 @@ def generate_launch_description() -> LaunchDescription:
             parameters=[param_path],
             arguments=["--ros-args", "--log-level", log_level],
 
-            prefix=["gnome-terminal --wait -- gdb --args"],
+            prefix=["gnome-terminal --wait -- gdb -q --args"],
             output="screen",
             emulate_tty=True,
             shell=True
