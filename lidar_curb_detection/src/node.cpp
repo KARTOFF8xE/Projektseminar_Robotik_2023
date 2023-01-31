@@ -102,17 +102,11 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
         RCLCPP_INFO(logger, "Left: %.5f\tRight: %.5f\tDistance: %.2f\tLeft_avg: %.5f\tRight_avg: %.5f", limits_vec[i].left, limits_vec[i].right, dist, limits_vec[i].avg_dist_left, limits_vec[i].avg_dist_right);
 
         auto pub_msg = custom_msgs::msg::Distance();
+        // pub_msg.set__header =  // TODO: Header adden
         pub_msg.left = limits_vec[i].left;
         pub_msg.right = limits_vec[i].right;
-        pub_msg.distance = dist;
-
         pub->publish(pub_msg);
     } else {
         RCLCPP_INFO(logger, "Not enough Values, i only have %d of %d", limits_vec.size(), min_quantity_of_values + 1);
     }
-    
-    
-    
-    
-    
 }
