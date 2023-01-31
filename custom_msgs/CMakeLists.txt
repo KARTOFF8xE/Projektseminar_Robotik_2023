@@ -21,6 +21,7 @@ find_package(rosidl_default_generators REQUIRED)
 #generate specified messages
 set(MESSAGES "")
 list(APPEND MESSAGES "msg/Distance.msg")
+list(APPEND MESSAGES "msg/Width.msg")
 
 rosidl_generate_interfaces(
   ${PROJECT_NAME}
