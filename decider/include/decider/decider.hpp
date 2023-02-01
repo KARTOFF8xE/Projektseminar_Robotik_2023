@@ -4,6 +4,15 @@
 #include <tuple>
 
 namespace decider {
+    struct received_msg {
+        // left limit
+        double left;
+        // right limit
+        double right;
+        // time of the measurement
+        int32_t timestamp; 
+    }
+
 //TODO: nötige Structs und Funktionen adden (siehe Bsp)
 //    /**
 //     * Transform scanner ranges to make them Top->Down use them in a cartesian coordinate system (right: X/distance; top: -Y/negative height;.
