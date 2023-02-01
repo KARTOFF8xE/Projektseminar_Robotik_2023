@@ -8,8 +8,6 @@
 
 int main(int argc, char* argv[]) {
 
-    bool do_visualize = (std::string(argv[1]) == "-v");
-
     rclcpp::init(argc, argv);
     std::shared_ptr<Node> node_ptr = std::make_shared<Node>();
 

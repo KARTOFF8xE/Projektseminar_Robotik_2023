@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <tuple>
+#include <rclcpp/time.hpp>
 
 namespace decider {
     struct received_msg {
@@ -10,8 +11,8 @@ namespace decider {
         // right limit
         double right;
         // time of the measurement
-        int32_t timestamp; 
-    }
+        rclcpp::Time timestamp;
+    };
 
 //TODO: nötige Structs und Funktionen adden (siehe Bsp)
 //    /**

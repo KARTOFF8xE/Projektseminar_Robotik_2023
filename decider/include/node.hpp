@@ -2,13 +2,14 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "custom_msgs/msg/distance.hpp"
-#include "custom_msgs/msg/width.hpp"
 
 #include "decider.hpp"
 
 class Node: public rclcpp::Node {
+    public:
+        Node();
     private:
-        void callback(const custom_msgs::msg::Distance msg);
+        void callback(const custom_msgs::msg::Distance::SharedPtr msg);
 
     struct custom_parameters_t {
         std::string sub_topic_1;
