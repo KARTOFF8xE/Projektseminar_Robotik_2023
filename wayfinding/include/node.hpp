@@ -45,8 +45,8 @@ class Node: public rclcpp::Node {
 
             //other
             double angle_filter;
-            double rel_tube_width;
             double optimal_line_angle;
+            double relative_scan_line_height;
         } custom_parameters;
 
         //rclcpp

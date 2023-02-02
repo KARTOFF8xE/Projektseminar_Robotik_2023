@@ -21,7 +21,7 @@ FLUX_TOPIC_MAP = {
 };
 DMC_TOPIC_MAP = {
 };
-PUB_TOPIC = "/path_width";
+PUB_TOPIC = "/camera_path_width";
 
 #topic loader in case the parameter file specifies different topics
 def load_topics(param_path: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str], pub_topic: str) -> typing.Tuple[typing.List[str] , typing.List[str], str]:

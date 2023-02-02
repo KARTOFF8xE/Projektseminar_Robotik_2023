@@ -25,20 +25,22 @@ void wayfinding::line_detection::preFilter(cv::InputArray src, cv::OutputArray d
     }
 }
 
-void wayfinding::line_detection::getHoughLines(cv::InputArray src, std::vector<cv::Vec4i>& dst, wayfinding::line_detection::parameters_t parameters) {
-    cv::Mat filtered;
-    wayfinding::line_detection::preFilter(src, filtered, parameters.filter_type, parameters.kernel_size);
+cv::Mat wayfinding::line_detection::getHoughLines(cv::Mat& src, std::vector<cv::Vec4i>& dst, wayfinding::line_detection::parameters_t parameters) {
+    //cv::Mat filtered;
+    wayfinding::line_detection::preFilter(src, src, parameters.filter_type, parameters.kernel_size);
 
-    wayfinding::line_detection::getHoughLines(filtered, dst, parameters.threshold1, parameters.threshold2, parameters.apertureSize, parameters.rho, parameters.theta, parameters.threshold, parameters.min_line_length, parameters.max_line_gap);
+    return wayfinding::line_detection::getHoughLines(src, dst, parameters.threshold1, parameters.threshold2, parameters.apertureSize, parameters.rho, parameters.theta, parameters.threshold, parameters.min_line_length, parameters.max_line_gap);
 }
 
-void wayfinding::line_detection::getHoughLines(cv::InputArray src, std::vector<cv::Vec4i>& dst, double threshold1, double threshold2, int apertureSize, double rho, double theta, int threshold, double min_line_length, double max_line_gap) {
+cv::Mat wayfinding::line_detection::getHoughLines(cv::InputArray src, std::vector<cv::Vec4i>& dst, double threshold1, double threshold2, int apertureSize, double rho, double theta, int threshold, double min_line_length, double max_line_gap) {
     cv::Mat canny_mat;
 
     //create contour image
     cv::Canny(src, canny_mat, threshold1, threshold2, apertureSize);
     //heuristically identify lines in contour image
     cv::HoughLinesP(canny_mat, dst, rho, theta, threshold, min_line_length, max_line_gap);
+
+    return canny_mat;
 }
 
 /**
@@ -145,12 +147,81 @@ double wayfinding::line_detection::imageMetric(const std::vector<cv::Vec4i>& lin
 }
 
 wayfinding::line_detection::parameters_t wayfinding::line_detection::getParametersFromMetric(double metric) {
-    //TODO
-    return wayfinding::line_detection::parameters_t();
+    wayfinding::line_detection::parameters_t return_parameters;
+
+    if (metric < 5'000) {
+        return_parameters.filter_type = FilterType::NO_FILTER;
+        //return_parameters.kernel_size = 1;
+    }
+
+    return return_parameters;
 }
 
 void wayfinding::line_detection::drawLines(cv::InputOutputArray img, const std::vector<cv::Vec4i>& lines, const cv::Scalar& color) {
     for (cv::Vec4i line: lines) {
         cv::line(img, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), color);
     }
+}
+
+/**
+ * Get the x coordinate of the intersection point on a line
+ * between A = (x_0, y_0) and  B = (x_1, y_1) with given y.
+ * 
+ * @param x_0: x coordinate of point A
+ * @param y_0: y coordinate of point A
+ * @param x_1: x coordinate of point B
+ * @param y_1: y coordinate of point B
+ * @param intersection_y: y coordinate of intersection point
+ * 
+ * @return x coordinate of intersection point
+*/
+int getLineIntersectionX(int x_0, int y_0, int x_1, int y_1, int intersection_y) {
+    /**
+     * given: line from A = (x_0, y_0) to B = (x_1, y_0) representable as C = A + t * (B - A)
+     *        where C = (intersection_x, intersection_y)
+     * wanted: intersection_y
+     * solution:
+     *  intersection_y = y_0 + t * (y_1 - y_0)
+     *  => t = intersection_y / (y_1 - y_0) - y_0
+     *  intersection_x = x_0 + t * (x_1 - x_0) with t from above
+    */
+
+    double t = static_cast<double>(intersection_y) / (y_1 - y_0) - y_0;
+    return x_0 + t * (x_1 - x_0);
+}
+
+std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::vector<cv::Vec4i>& lines, int scan_height, int width) {
+    int left = -1, right = width + 1;
+    const int middle = width / 2;
+    
+    int x_0, y_0,
+        x_1, y_1;
+    int min_y, max_y;
+    int intersection_x;
+
+    for (cv::Vec4i line: lines) {
+        y_0 = line[1]; y_1 = line[3];
+        //since we can't be sure that (y_0 < y_1) applies:
+        min_y = std::min(y_0, y_1); max_y = std::max(y_0, y_1);
+
+        if (min_y <= scan_height || scan_height <= max_y) { //check if the lines crosses the scan_line (horizontal @ y = scan_height)
+            x_0 = line[0]; x_1 = line[2];
+            intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
+
+            if (intersection_x < middle && intersection_x > left) { //valid left value if left of middle and greater (more to the right) then the last left
+                left = intersection_x;
+            } else if (intersection_x >= middle && intersection_x < right) { //valid right if right of middle and lower (more to the left) then the last right
+                right = intersection_x;
+            }
+        }
+    }
+
+    //if left didn't ever get any valid values it will still be -1 (a non-reachable value)
+    //if right didn't ever get any valid values it will still be [width + 1] (a non-reachable value)
+    //to signal that a side didn't get a valid value it will be set to -1, thus a non-valid right value will also need to be set to -1
+    if (right == width + 1) {
+        right = -1;
+    }
+
+    return std::make_pair(left, right);
 }

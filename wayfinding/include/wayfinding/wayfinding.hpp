@@ -21,20 +21,26 @@ namespace wayfinding {
             NO_FILTER
         };
 
+        //TODO: CONTINUE
+        // thresholds canny
+        // line length und line gap
+        // filter
+
         //struct for predefiend canny/hough parameters
         //default values represent universal hough parameters for metric generation
         //both resolutions (rho, theta) probably won't need to be changed to they have default values for ease of initialization
         struct parameters_t {
             //TODO: Warum eigentlich nicht ungefiltert?
             FilterType filter_type  = FilterType::MEDIAN;
-            int kernel_size         = 5;
+            int kernel_size         = 3;
+            double center_width     = 30.0;
 
             double threshold1       = 50;
-            double threshold2       = 200;
+            double threshold2       = 150;
             int apertureSize        = 3;
             int threshold           = 120;
             double min_line_length  = 100;
-            double max_line_gap     = 20;
+            double max_line_gap     = 50;
 
             double rho = 1;
             double theta = M_PI / 180;
@@ -65,8 +71,8 @@ namespace wayfinding {
          * @param dst: destination for vector of detected lines
          * @param parameters: parameter struct holding predefined parameter values
         */
-        void getHoughLines(
-            cv::InputArray src,
+        cv::Mat getHoughLines(
+            cv::Mat& src,
             std::vector<cv::Vec4i>& dst,
             parameters_t parameters
         );
@@ -86,7 +92,7 @@ namespace wayfinding {
          * @param min_line_length: Minimum line length. Line segments shorter than that are rejected. [HoughLinesP]
          * @param max_line_gap: Maximum allowed gap between points on the same line to link them. [HougLinesP]
         */
-        void getHoughLines(
+        cv::Mat getHoughLines(
             cv::InputArray src,
             std::vector<cv::Vec4i>& dst,
             double threshold1,
@@ -153,6 +159,21 @@ namespace wayfinding {
             cv::InputOutputArray img,
             const std::vector<cv::Vec4i>& lines,
             const cv::Scalar& color
+        );
+
+        /**
+         * Extract distance from center to left/right side from detected lines.
+         * If either side equals -1, then no value was found for this side.
+         * 
+         * @param lines: prefiltered, detected image lines
+         * @param scan_height: level at which to scan for distances [px]
+         * 
+         * @return pair of left (first) and right (second) distances
+        */
+        std::pair<int, int> getLeftRightDistance(
+            const std::vector<cv::Vec4i>& lines,
+            int scan_height,
+            int width
         );
     }
 

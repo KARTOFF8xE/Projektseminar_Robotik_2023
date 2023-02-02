@@ -10,5 +10,7 @@ wayfinding:
       # dmc:
       # pub: "/path_width"
     # params:
-      # angle_filter: 22.5
-      # rel_tube_width: 60.0
+      # angle_filter: 75.0
+      # params.optimal_line_angle: 90.0
+    # debug:
+      # metric_output_file: "metric_table"
