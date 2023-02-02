@@ -7,32 +7,31 @@
 namespace decider {
     struct limit {
         // left limit
-        double limit;
+        double limit = 0;
         // time of the measurement
         rclcpp::Time timestamp;
     };
 
-//TODO: nötige Structs und Funktionen adden (siehe Bsp)
-//    /**
-//     * Transform scanner ranges to make them Top->Down use them in a cartesian coordinate system (right: X/distance; top: -Y/negative height;.
-//     * 
-//     * @param range: original scanner ranges
-//     * @param increment: laser scanner horizontal angle increment
-//     * @param min_range: minimal useable range value
-//     * @param max_range: maximal useable range value
-//     * @param min_angle: minimal angle of valid/usefull LiDAR-data
-//     * @param max_angle: maximal angle of valid/usefull LiDAR-data
-//     * @param mounting_angle: vertical angle at which the scanner is looking at the ground
-//     * 
-//     * @returns transformed scanner ranges
-//    */
-//    std::vector<lidar_measures> get_height_line(
-//        std::vector<float> range,
-//        double increment,
-//        double min_range,
-//        double max_range,
-//        double min_angle,
-//        double max_angle,
-//        double mounting_angle
-//    );
+    struct limits {
+        // left limit
+        double right_limit;
+        // right limit
+        double left_limit;
+        // time of the measurement
+        rclcpp::Time timestamp;
+    };
+
+    /**
+     * Try's to Combine several Limit-Values from the given Vectors
+     * 
+     * @param limit_1:  The limit for which we try to find a Partner
+     * @param limits_2: The Buffer with Limits of possible Partners
+     * 
+     * @return The Result-Limit of up to two Limits
+    */
+    decider::limit get_limits(
+        decider::limit limit_1,
+        std::vector<decider::limit> limits_2
+    );
+
 }

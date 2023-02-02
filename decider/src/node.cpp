@@ -29,6 +29,15 @@ void Node::callback_1(const custom_msgs::msg::Distance::SharedPtr msg) {
         msg->left,
         msg->header.stamp
     });
+
+    decider::limit left_limit;
+    decider::limit right_limit;
+    if (val_buf_sub_top_1_left.size() > 3 && val_buf_sub_top_2_left.size() > 10) {
+        left_limit = decider::get_limits(val_buf_sub_top_1_left.at(0), val_buf_sub_top_2_left);
+    }
+    if (val_buf_sub_top_1_right.size() > 3 && val_buf_sub_top_2_right.size() > 10) {
+        right_limit = decider::get_limits(val_buf_sub_top_1_right.at(0), val_buf_sub_top_2_right);
+    }
 }
 
 void Node::callback_2(const custom_msgs::msg::Distance::SharedPtr msg) {
