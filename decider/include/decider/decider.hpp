@@ -5,11 +5,9 @@
 #include <rclcpp/time.hpp>
 
 namespace decider {
-    struct received_msg {
+    struct limit {
         // left limit
-        double left;
-        // right limit
-        double right;
+        double limit;
         // time of the measurement
         rclcpp::Time timestamp;
     };
