@@ -18,7 +18,9 @@ Node::Node(): rclcpp::Node("decider") {
 
 void Node::callback_1(const custom_msgs::msg::Distance::SharedPtr msg) {
     rclcpp::Logger logger = this->get_logger();
-
+    /**
+     * Lege die Limits in die jeweiligen Buffer
+    */
     this->val_buf_sub_top_1_left.push_back(decider::limit{
         msg->left,
         msg->header.stamp
@@ -31,13 +33,19 @@ void Node::callback_1(const custom_msgs::msg::Distance::SharedPtr msg) {
 
 void Node::callback_2(const custom_msgs::msg::Distance::SharedPtr msg) {
     rclcpp::Logger logger = this->get_logger();
-
-    this->val_buf_sub_top_2_left.push_back(decider::limit{
-        msg->left,
-        msg->header.stamp
-    });
-    this->val_buf_sub_top_2_right.push_back(decider::limit{
-        msg->left,
-        msg->header.stamp
-    });
+    /**
+     * Wenn das erhaltene Limit jeweils existiert, wird es in den Buffer geladen, andernfalls nicht
+    */
+    if (msg->left > 0) {    
+        this->val_buf_sub_top_2_left.push_back(decider::limit{
+            msg->left,
+            msg->header.stamp
+        });
+    }
+    if (msg->right > 0) {
+        this->val_buf_sub_top_2_right.push_back(decider::limit{
+            msg->left,
+            msg->header.stamp
+        });
+    }
 }
