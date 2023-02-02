@@ -28,7 +28,6 @@ class Node: public rclcpp::Node {
     std::vector<decider::limit> val_buf_sub_top_2_left;
     std::vector<decider::limit> val_buf_sub_top_2_right;
     std::vector<decider::limit> limits;
-    //TODO: Vektor in Vektor in welchem alle Rechten Limits pro Topic gespeichert werden
-    //TODO: Vektor in welchem alle validen Limits gespeichert werden
-    //TODO: Vektor in welchem alle Distanzen gespeichert werden
+    bool left_limit_exists = false;
+    bool right_limit_exists = false;
 };
