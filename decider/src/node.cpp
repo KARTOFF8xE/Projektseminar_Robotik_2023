@@ -6,9 +6,9 @@
 using std::placeholders::_1;
 
 Node::Node(): rclcpp::Node("decider") {
-    this->declare_parameter<std::string>("sub_topic_1",         "/path_information");
-    this->declare_parameter<std::string>("sub_topic_2",         "/sick/scan");
-    this->declare_parameter<std::string>("publish_topic",       "/path_information");
+    this->declare_parameter<std::string>("sub_topic_1",         "/lidar_path_width");
+    this->declare_parameter<std::string>("sub_topic_2",         "/camera_path_width");
+    this->declare_parameter<std::string>("publish_topic",       "/path_width");
 
     this->get_parameter("sub_topic_1",                          custom_parameters.sub_topic_1);
     this->get_parameter("sub_topic_2",                          custom_parameters.sub_topic_2);
