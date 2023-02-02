@@ -35,5 +35,16 @@ decider::limit decider::get_limits(decider::limit limit_1, std::vector<decider::
         }
     }
 
+    /**
+     * If we only have a valid Limit from the Buffer:                                   take it
+     * If we have collected a Limit from the Buffer and an existing one for the Check:  combine them
+     * If we have no Limit from the Buffer, but one for the Check:                      take the one of the Check
+     * If we have no Limits:                                                            Impossible to find a Limit this Time
+    */
+    if (!(limit_1.limit > 0)) {
+        return limit;
+    }
+    limit = (limit.limit > 0) ? decider::limit{(limit_1.limit * limit.limit) / 2, limit_1.timestamp} : limit_1;
+
     return limit;
 }
