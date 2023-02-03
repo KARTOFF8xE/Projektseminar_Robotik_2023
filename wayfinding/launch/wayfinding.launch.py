@@ -40,6 +40,7 @@ def load_topics(param_path: str, flux_topic_map: typing.Dict[str, str], dmc_topi
 
 def generate_launch_description() -> LaunchDescription:
     bag_dir = LaunchConfiguration("bag_dir");
+    replay_rate = LaunchConfiguration("bag_rate");
     flux = LaunchConfiguration("flux");
     dmc = LaunchConfiguration("dmc");
     log_level = LaunchConfiguration("log_level");
@@ -57,6 +58,11 @@ def generate_launch_description() -> LaunchDescription:
                 "bag_dir",
                 default_value=os.getcwd(),
                 description="Specify the bag folder if the bags are not in the cwd."
+            ),
+            DeclareLaunchArgument(
+                "bag_rate",
+                default_value='1.0',
+                description="Rate at which to play back messages. Valid range > 0.0"
             ),
             DeclareLaunchArgument(
                 "flux",
@@ -111,6 +117,7 @@ def generate_launch_description() -> LaunchDescription:
                 cmd=[
                     "ros2", "bag",  "play",
                     flux,
+                    "--rate", replay_rate,
                     "--loop",
                     "--topics"
                 ] + flux_topics,
@@ -143,6 +150,7 @@ def generate_launch_description() -> LaunchDescription:
                 cmd=[
                     "ros2", "bag",  "play",
                     dmc,
+                    "--rate", replay_rate,
                     "--loop",
                     "--topics"
                 ] + dmc_topics,
