@@ -33,13 +33,12 @@ namespace wayfinding {
             //TODO: Warum eigentlich nicht ungefiltert?
             FilterType filter_type  = FilterType::MEDIAN;
             int kernel_size         = 3;
-            double center_width     = 30.0;
+            double center_width     = 20.0;
 
-            double threshold1       = 50;
-            double threshold2       = 150;
+            double sigma            = .33;
             int apertureSize        = 3;
-            int threshold           = 120;
-            double min_line_length  = 100;
+            int threshold           = 100;
+            double min_line_length  = 75;
             double max_line_gap     = 50;
 
             double rho = 1;
@@ -95,8 +94,7 @@ namespace wayfinding {
         cv::Mat getHoughLines(
             cv::InputArray src,
             std::vector<cv::Vec4i>& dst,
-            double threshold1,
-            double threshold2,
+            double sigma,
             int apertureSize,
             double rho,
             double theta,

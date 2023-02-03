@@ -4,22 +4,22 @@
 
 void wayfinding::line_detection::preFilter(cv::InputArray src, cv::OutputArray dst, wayfinding::line_detection::FilterType filter, int ksize) {
     switch (filter) {
-        case wayfinding::line_detection::FilterType::NO_FILTER:
+        case FilterType::NO_FILTER:
             src.copyTo(dst);
             break;
-        case wayfinding::line_detection::FilterType::MEDIAN:    //Median Filter
+        case FilterType::MEDIAN:    //Median Filter
             cv::medianBlur(src, dst, ksize);
             break;
-        case wayfinding::line_detection::FilterType::NORM_BOX:  //Normalized Box Filter
+        case FilterType::NORM_BOX:  //Normalized Box Filter
             cv::blur(src, dst, cv::Size(ksize, ksize));
             break;
-        case wayfinding::line_detection::FilterType::BILATERAL: //Bilateral Filter
+        case FilterType::BILATERAL: //Bilateral Filter
             cv::bilateralFilter(src, dst, 5, 200.0, 200.0);
             break;
-        case wayfinding::line_detection::FilterType::BOX:       //Box Filter
+        case FilterType::BOX:       //Box Filter
             cv::boxFilter(src, dst, -1, cv::Size(ksize, ksize));
             break;
-        case wayfinding::line_detection::FilterType::GAUSS:     //Gaussian Filter
+        case FilterType::GAUSS:     //Gaussian Filter
             cv::GaussianBlur(src, dst, cv::Size(ksize, ksize), 1.5, 2);
             break;
     }
@@ -27,16 +27,43 @@ void wayfinding::line_detection::preFilter(cv::InputArray src, cv::OutputArray d
 
 cv::Mat wayfinding::line_detection::getHoughLines(cv::Mat& src, std::vector<cv::Vec4i>& dst, wayfinding::line_detection::parameters_t parameters) {
     //cv::Mat filtered;
-    wayfinding::line_detection::preFilter(src, src, parameters.filter_type, parameters.kernel_size);
+    preFilter(src, src, parameters.filter_type, parameters.kernel_size);
 
-    return wayfinding::line_detection::getHoughLines(src, dst, parameters.threshold1, parameters.threshold2, parameters.apertureSize, parameters.rho, parameters.theta, parameters.threshold, parameters.min_line_length, parameters.max_line_gap);
+    return getHoughLines(src, dst, parameters.sigma, parameters.apertureSize, parameters.rho, parameters.theta, parameters.threshold, parameters.min_line_length, parameters.max_line_gap);
 }
 
-cv::Mat wayfinding::line_detection::getHoughLines(cv::InputArray src, std::vector<cv::Vec4i>& dst, double threshold1, double threshold2, int apertureSize, double rho, double theta, int threshold, double min_line_length, double max_line_gap) {
-    cv::Mat canny_mat;
+/**
+ * Calculate the median over all matrix elements
+ * 
+ * @param matrix: single channel source matrix
+ * 
+ * @return median value
+*/
+double getMatrixMedian(const cv::Mat& matrix) {
+    //TODO: Das könnte man bestimmt schöner machen
+    CV_Assert(matrix.channels() == 3);
+
+    std::vector<double> matrix_as_vector;
+    //reshape matrix into one dimensional array and write to vector
+    matrix.reshape(0,1).copyTo(matrix_as_vector);
+
+    std::vector<double>::iterator begin = matrix_as_vector.begin();
+    size_t half_vector_size = matrix_as_vector.size() / 2;
+    std::nth_element(begin, begin + half_vector_size, matrix_as_vector.end());
+
+    return matrix_as_vector[half_vector_size];
+}
+
+cv::Mat wayfinding::line_detection::getHoughLines(cv::InputArray src, std::vector<cv::Vec4i>& dst, double sigma, int apertureSize, double rho, double theta, int threshold, double min_line_length, double max_line_gap) {
+    cv::Mat canny_mat, temp;
+
+    cv::cvtColor(src, temp, cv::COLOR_BGR2GRAY);
+    double median = ::getMatrixMedian(temp);
+	double lower_threshold = std::max(0.0, (1.0 - sigma) * median),
+	       upper_threshold = std::min(255.0, (1.0 + sigma) * median);
 
     //create contour image
-    cv::Canny(src, canny_mat, threshold1, threshold2, apertureSize);
+    cv::Canny(temp, canny_mat, lower_threshold, upper_threshold, apertureSize); //threshold1, threshold2, apertureSize);
     //heuristically identify lines in contour image
     cv::HoughLinesP(canny_mat, dst, rho, theta, threshold, min_line_length, max_line_gap);
 
@@ -151,7 +178,8 @@ wayfinding::line_detection::parameters_t wayfinding::line_detection::getParamete
 
     if (metric < 5'000) {
         return_parameters.filter_type = FilterType::NO_FILTER;
-        //return_parameters.kernel_size = 1;
+    } else if (metric > 100'000) {
+        return_parameters.filter_type = FilterType::GAUSS;
     }
 
     return return_parameters;
@@ -206,7 +234,11 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
 
         if (min_y <= scan_height || scan_height <= max_y) { //check if the lines crosses the scan_line (horizontal @ y = scan_height)
             x_0 = line[0]; x_1 = line[2];
-            intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
+            //intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
+            double t = static_cast<double>(scan_height) / (y_1 - y_0) - y_0;
+            intersection_x = x_0 + t * (x_1 - x_0);
+
+            //std::cout << "(" << intersection_x << ", " << t << ", " << min_y << ", " << max_y << ") ";
 
             if (intersection_x < middle && intersection_x > left) { //valid left value if left of middle and greater (more to the right) then the last left
                 left = intersection_x;
@@ -215,6 +247,8 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
             }
         }
     }
+
+    //std::endl(std::cout);
 
     //if left didn't ever get any valid values it will still be -1 (a non-reachable value)
     //if right didn't ever get any valid values it will still be [width + 1] (a non-reachable value)

@@ -213,6 +213,7 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
     //get left and right distance coordinates
     int left, right;
     int scan_line_height = (1 - custom_parameters.relative_scan_line_height) * image_size.height;
+    //TODO: hmmmmm iwas is falsch beim ermitteln der x-werte
     std::tie(left, right) = wayfinding::line_detection::getLeftRightDistance(filtered_lines, scan_line_height, image_size.width);
     
     //create, populate and publish message
