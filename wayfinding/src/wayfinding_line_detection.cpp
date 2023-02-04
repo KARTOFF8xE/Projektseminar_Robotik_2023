@@ -41,7 +41,7 @@ cv::Mat wayfinding::line_detection::getHoughLines(cv::Mat& src, std::vector<cv::
 */
 double getMatrixMedian(const cv::Mat& matrix) {
     //TODO: Das könnte man bestimmt schöner machen
-    CV_Assert(matrix.channels() == 3);
+    CV_Assert(matrix.channels() == 1);
 
     std::vector<double> matrix_as_vector;
     //reshape matrix into one dimensional array and write to vector
@@ -210,11 +210,11 @@ int getLineIntersectionX(int x_0, int y_0, int x_1, int y_1, int intersection_y)
      * wanted: intersection_y
      * solution:
      *  intersection_y = y_0 + t * (y_1 - y_0)
-     *  => t = intersection_y / (y_1 - y_0) - y_0
+     *  => t = (intersection_y - y_0) / (y_1 - y_0)
      *  intersection_x = x_0 + t * (x_1 - x_0) with t from above
     */
 
-    double t = static_cast<double>(intersection_y) / (y_1 - y_0) - y_0;
+    double t = static_cast<double>(intersection_y - y_0) / (y_1 - y_0);
     return x_0 + t * (x_1 - x_0);
 }
 
@@ -234,11 +234,9 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
 
         if (min_y <= scan_height || scan_height <= max_y) { //check if the lines crosses the scan_line (horizontal @ y = scan_height)
             x_0 = line[0]; x_1 = line[2];
-            //intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
-            double t = static_cast<double>(scan_height) / (y_1 - y_0) - y_0;
-            intersection_x = x_0 + t * (x_1 - x_0);
+            intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
 
-            //std::cout << "(" << intersection_x << ", " << t << ", " << min_y << ", " << max_y << ") ";
+            std::cout << "(" << intersection_x << ", " << min_y << ", " << max_y << ") ";
 
             if (intersection_x < middle && intersection_x > left) { //valid left value if left of middle and greater (more to the right) then the last left
                 left = intersection_x;
@@ -248,7 +246,7 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
         }
     }
 
-    //std::endl(std::cout);
+    std::endl(std::cout);
 
     //if left didn't ever get any valid values it will still be -1 (a non-reachable value)
     //if right didn't ever get any valid values it will still be [width + 1] (a non-reachable value)
