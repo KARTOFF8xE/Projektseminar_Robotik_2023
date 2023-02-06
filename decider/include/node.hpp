@@ -9,24 +9,26 @@ class Node: public rclcpp::Node {
     public:
         Node();
     private:
-        void callback_1(const custom_msgs::msg::Distance::SharedPtr msg);
-        void callback_2(const custom_msgs::msg::Distance::SharedPtr msg);
+        void callback_lf(const custom_msgs::msg::Distance::SharedPtr msg);
+        void callback_hf(const custom_msgs::msg::Distance::SharedPtr msg);
+        void timer_callback();
 
     struct custom_parameters_t {
-        std::string sub_topic_1;
-        std::string sub_topic_2;
+        std::string sub_topic_lf;
+        std::string sub_topic_hf;
         std::string pub_topic;
     } custom_parameters;
 
-    rclcpp::Subscription<custom_msgs::msg::Distance>::SharedPtr sub_1;
-    rclcpp::Subscription<custom_msgs::msg::Distance>::SharedPtr sub_2;
+    rclcpp::Subscription<custom_msgs::msg::Distance>::SharedPtr sub_lf;
+    rclcpp::Subscription<custom_msgs::msg::Distance>::SharedPtr sub_hf;
     rclcpp::Publisher<custom_msgs::msg::Distance>::SharedPtr    pub;
+    rclcpp::TimerBase::SharedPtr                                timer_;
     
 
-    std::vector<decider::limit> val_buf_sub_top_1_left;
-    std::vector<decider::limit> val_buf_sub_top_1_right;
-    std::vector<decider::limit> val_buf_sub_top_2_left;
-    std::vector<decider::limit> val_buf_sub_top_2_right;
+    std::vector<decider::limit> val_buf_sub_top_lf_left;
+    std::vector<decider::limit> val_buf_sub_top_lf_right;
+    std::vector<decider::limit> val_buf_sub_top_hf_left;
+    std::vector<decider::limit> val_buf_sub_top_hf_right;
     std::vector<decider::limit> limits;
     bool left_limit_exists = false;
     bool right_limit_exists = false;
