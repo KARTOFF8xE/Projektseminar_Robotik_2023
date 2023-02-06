@@ -47,6 +47,9 @@ void Node::callback_1(const custom_msgs::msg::Distance::SharedPtr msg) {
         pub_msg.header.stamp = left_limit.timestamp;
         pub_msg.left = left_limit.limit;
         pub_msg.right = right_limit.limit;
+        if (left_limit.limit > 0 && right_limit.limit > 0) {
+            pub_msg.width = left_limit.limit + right_limit.limit;
+        }
         pub->publish(pub_msg);
     }
 }
