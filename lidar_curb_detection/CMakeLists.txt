@@ -24,8 +24,7 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
-include_directories(/home/georg/ros2_github/install/filters/include)
-
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../install/filters/include)
 
 link_directories(${OpenCV_LIBRARY_DIRS})
 
@@ -35,10 +34,10 @@ list(APPEND SOURCES "src/node.cpp")
 list(APPEND SOURCES "src/lidar_curb_detection.cpp")
 
 add_library(${PROJECT_NAME}_lib "src/${PROJECT_NAME}.cpp" "include/${PROJECT_NAME}/${PROJECT_NAME}.hpp")
+target_link_libraries(${PROJECT_NAME}_lib filters::filters_lib)
 
-add_executable(${PROJECT_NAME} ${SOURCES}) # `pkg-config --libs opencv4`
+add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${PROJECT_NAME}_lib filters::filters_lib)
-# target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 add_definitions(-O3)
 ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs custom_msgs)
 
