@@ -83,23 +83,6 @@ namespace lidar_curb_det {
     );
 
     /**
-     * Absolut-Values check for a Curbstone    
-     * 
-     * @param height_line: the in "get_height_line" transformed height line
-     * @param height_diff: defines the needed height difference [in meters] between the road and the curbstone
-     * 
-     * @returns left and/or right distance to curbstone as lidar_curb_det::limit-struct (from horizontal Robot-Center) if existing. Returning -1 per side if not existing fot the side
-    */
-    filters::limit curbstone_checker_absolut(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
-        double height_diff,
-        size_t max_check_length,
-        double advanced_ray_check_thr,
-        double wheel_inside,
-        double wheel_width
-    );
-
-    /**
      * Get Angle between 2 Vectors
      * 
      * @param v1: first Vector
