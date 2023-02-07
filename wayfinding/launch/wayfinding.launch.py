@@ -16,9 +16,9 @@ def load_topics(default_path: str) -> typing.Tuple[typing.Dict[str, str], typing
     with open(default_path, 'r') as default_yaml:
         defaults: dict = yaml.safe_load(default_yaml)
 
-    flux_topic_map  = defaults.get("flux", {});
-    dmc_topic_map   = defaults.get("dmc", {});
-    pub_topic       = defaults.get("pub", "");
+    flux_topic_map  = defaults.get("flux") or {};
+    dmc_topic_map   = defaults.get("dmc") or {};
+    pub_topic       = defaults.get("pub") or "";
 
     return flux_topic_map, dmc_topic_map, pub_topic;
 
@@ -48,7 +48,7 @@ def generate_launch_description() -> LaunchDescription:
 
     share_path = get_package_share_directory(PKG_NAME);
     param_path = os.path.join(share_path, "param/param.yaml");
-    flux_topic_map, dmc_topic_map, pub_topic = load_topics(os.path.join(share_path, "/launch/default_topics.yaml"));
+    flux_topic_map, dmc_topic_map, pub_topic = load_topics(os.path.join(share_path, "launch/default_topics.yaml"));
     flux_topics, dmc_topics, pub_topic = update_topics(param_path, flux_topic_map.copy(), dmc_topic_map.copy(), pub_topic);
 
     ld = LaunchDescription(
