@@ -112,33 +112,33 @@ namespace lidar_curb_det {
         double wheel_inside
     );
 
-    /**
-     * Visualizing Data
-     * 
-     * @param height_line: the in "get_height_line" transformed height line
-     * @param left_border: the left Limit of the way driven on
-     * @param right_border: the right Limit of the way driven on
-     * 
-     * @returns nothing
-    */
-    void visualize_cross_section(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
-        double left_border,
-        double right_border,
-        double wheel_inside,
-        double wheel_width
-    );
+    // /**
+    //  * Visualizing Data
+    //  * 
+    //  * @param height_line: the in "get_height_line" transformed height line
+    //  * @param left_border: the left Limit of the way driven on
+    //  * @param right_border: the right Limit of the way driven on
+    //  * 
+    //  * @returns nothing
+    // */
+    // void visualize_cross_section(
+    //     std::vector<lidar_curb_det::lidar_measures> height_line,
+    //     double left_border,
+    //     double right_border,
+    //     double wheel_inside,
+    //     double wheel_width
+    // );
 
-    /**
-     * Get the Streetview from the recorded Data
-     * 
-     * @param limits_vec: a Vector where the Limits of all records are inside
-     * 
-     * @returns nothing
-    */
-    void visualize_street_view(
-        std::vector<filters::limit> limits_vec,
-        double wheel_inside,
-        double wheel_width
-    );
+    // /**
+    //  * Get the Streetview from the recorded Data
+    //  * 
+    //  * @param limits_vec: a Vector where the Limits of all records are inside
+    //  * 
+    //  * @returns nothing
+    // */
+    // void visualize_street_view(
+    //     std::vector<filters::limit> limits_vec,
+    //     double wheel_inside,
+    //     double wheel_width
+    // );
 }
