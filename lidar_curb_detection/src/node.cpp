@@ -1,5 +1,6 @@
 #include "node.hpp"
 #include "lidar_curb_detection.hpp"
+#include "filters/post_filters.hpp"
 
 #include "rclcpp/qos.hpp"
 
@@ -65,13 +66,13 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     height_line = lidar_curb_det::sort_height_line(height_line);
     
     /*** Calculate Limits (if possible) with the help of the Vectors and add those Limits to a List of Limits ***/
-    lidar_curb_det::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.max_check_length, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside);
+    filters::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.max_check_length, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside);
     this->limits_vec.push_back(limit);
 
     /*** Filter for to high deviations ***/
     if (limits_vec.size() > 2 * custom_parameters.quantity_check_for_runaways + 1) {
         size_t i = limits_vec.size() - (custom_parameters.quantity_check_for_runaways + 1);
-        limits_vec[i] = lidar_curb_det::get_avg_dist(limits_vec, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr, custom_parameters.avg_dist_thr, i);
+        limits_vec[i] = filters::get_avg_dist(limits_vec, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr, custom_parameters.avg_dist_thr, i);
         // limit.avg_dist_left = limits_vec[i].avg_dist_left;
         // limit.avg_dist_right = limits_vec[i].avg_dist_right;
     }
@@ -79,13 +80,14 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     /*** Filter for runaways ***/
     if (limits_vec.size() > ((2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1))) {
         size_t i = limits_vec.size() - ((custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1));
-        limits_vec[i] = lidar_curb_det::filter_for_runaways(limits_vec, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
+        limits_vec[i] = filters::filter_for_runaways(limits_vec, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
+
     } 
 
     /*** Work in Progress ***/
     if (limits_vec.size() > ((2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1) + (2 * custom_parameters.quantity_check_for_island + 1))) {
         size_t i = limits_vec.size() - ((custom_parameters.quantity_check_for_island + 1) + (2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1));
-        limits_vec[i] = lidar_curb_det::check_for_valid_island(limits_vec, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
+        limits_vec[i] = filters::check_for_valid_island(limits_vec, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
     }
 
     /*** Visualize anything, if wanted ***/

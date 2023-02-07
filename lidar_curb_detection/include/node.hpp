@@ -41,5 +41,5 @@ class Node: public rclcpp::Node {
     rclcpp::Publisher<custom_msgs::msg::Distance>::SharedPtr        pub;
 
     bool do_visualize;
-    std::vector<lidar_curb_det::limit> limits_vec;
+    std::vector<filters::limit> limits_vec;
 };
