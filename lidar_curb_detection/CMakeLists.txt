@@ -24,7 +24,6 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../install/filters/include)
 
 link_directories(${OpenCV_LIBRARY_DIRS})
 

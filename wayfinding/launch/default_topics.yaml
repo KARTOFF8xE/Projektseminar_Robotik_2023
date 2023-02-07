@@ -6,5 +6,4 @@ flux:
   rgb_image:   "/zed2i_c1/zed_node_c1/rgb/image_rect_color"
   depth_image: "/zed2i_c1/zed_node_c1/depth/depth_registered"
 dmc:
-  #empty
 pub: "/camera_path_width"

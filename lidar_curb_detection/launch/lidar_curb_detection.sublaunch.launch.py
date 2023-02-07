@@ -9,8 +9,9 @@ from launch.actions import DeclareLaunchArgument
 PKG_NAME = "lidar_curb_detection";
 
 def generate_launch_description():
-    lidar_curb_detection_param_path = LaunchConfiguration("lidar_curb_detection_param_dir", default=os.path.join(get_package_share_directory(), "param/param.yaml"))
     log_level = LaunchConfiguration("log_level");
+
+    param_path = os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml");
 
     ld = LaunchDescription(
         (
@@ -28,7 +29,7 @@ def generate_launch_description():
             package="lidar_curb_detection",
             executable="lidar_curb_detection",
             parameters=[
-                lidar_curb_detection_param_path
+                param_path
             ],
             arguments=["--ros-args", "--log-level", log_level],
 

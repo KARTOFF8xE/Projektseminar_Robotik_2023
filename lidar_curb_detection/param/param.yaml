@@ -9,7 +9,7 @@ lidar_curb_detection:
     # robot_specific:
     #   wheel_inside:                 # Width of the Wheels   
     #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
-    #   #mounting_angle:   30          # The Mounting-Angle of the LiDAR
+    #   mounting_angle:   30          # The Mounting-Angle of the LiDAR
     # filter:
     #   distance_thr:                 # Filter: Threshold that tells the filter, how far another Point is allowed to be away to be valid
     #   quantity_check:               # Filter: Amount of Limits that is checked in each direction (before and behind)
