@@ -1,0 +1,5 @@
+flux:
+  #empty
+dmc:
+  laserscan: "/sick/scan"
+pub: "/lidar_path_width"

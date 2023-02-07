@@ -9,34 +9,31 @@ from launch.conditions import IfCondition, LaunchConfigurationNotEquals
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PythonExpression
 
-#the following are package specific
 PKG_NAME = "wayfinding";
-FLUX_TOPIC_MAP = {
-    "camera_info": "/zed2i_c1/zed_node_c1/rgb/camera_info",
-    "imu":         "/imu/data",
-    "depth_info":  "/zed2i_c1/zed_node_c1/depth/depth_info",
-    "pointcloud":  "/zed2i_c1/zed_node_c1/point_cloud/cloud_registered",
-    "rgb_image":   "/zed2i_c1/zed_node_c1/rgb/image_rect_color",
-    "depth_image": "/zed2i_c1/zed_node_c1/depth/depth_registered"
-};
-DMC_TOPIC_MAP = {
-};
-PUB_TOPIC = "/camera_path_width";
 
-#topic loader in case the parameter file specifies different topics
-def load_topics(param_path: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str], pub_topic: str) -> typing.Tuple[typing.List[str] , typing.List[str], str]:
+#load default topic maps
+def load_topics(default_path: str) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str], str]:
+    with open(default_path, 'r') as default_yaml:
+        defaults: dict = yaml.safe_load(default_yaml)
+
+    flux_topic_map  = defaults.get("flux", {});
+    dmc_topic_map   = defaults.get("dmc", {});
+    pub_topic       = defaults.get("pub", "");
+
+    return flux_topic_map, dmc_topic_map, pub_topic;
+
+#topic updater in case the parameter file specifies different topics
+def update_topics(param_path: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str], pub_topic: str) -> typing.Tuple[typing.List[str] , typing.List[str], str]:
     with open(param_path, 'r') as param_yaml:
         params: dict = yaml.safe_load(param_yaml)[PKG_NAME]["ros__parameters"];
 
-    if "topics" not in params:
-        return list(flux_topic_map.values()), list(dmc_topic_map.values()), pub_topic;
+    if "topics" in params:
+        topics = params["topics"];
+        if "flux" in topics: flux_topic_map.update(topics["flux"]);
+        if "dmc" in topics: dmc_topic_map.update(topics["dmc"]);
+        if "pub" in topics: pub_topic = topics["pub"];
 
-    topics = params["topics"];
-    if "flux" in topics: flux_topic_map.update(topics["flux"]);
-    if "dmc" in topics: dmc_topic_map.update(topics["dmc"]);
-    if "pub" in topics: pub_topic = topics["pub"];
-
-    return list(flux_topic_map.values()), list(dmc_topic_map.values()), pub_topic;    
+    return list(flux_topic_map.values()), list(dmc_topic_map.values()), pub_topic;
 
 def generate_launch_description() -> LaunchDescription:
     bag_dir = LaunchConfiguration("bag_dir");
@@ -49,8 +46,10 @@ def generate_launch_description() -> LaunchDescription:
 
     global_exit = Shutdown(reason="One or more components failed.");
 
-    param_path = os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml");
-    flux_topics, dmc_topics, pub_topic = load_topics(param_path, FLUX_TOPIC_MAP.copy(), DMC_TOPIC_MAP.copy(), PUB_TOPIC);
+    share_path = get_package_share_directory(PKG_NAME);
+    param_path = os.path.join(share_path, "param/param.yaml");
+    flux_topic_map, dmc_topic_map, pub_topic = load_topics(os.path.join(share_path, "/launch/default_topics.yaml"));
+    flux_topics, dmc_topics, pub_topic = update_topics(param_path, flux_topic_map.copy(), dmc_topic_map.copy(), pub_topic);
 
     ld = LaunchDescription(
         (

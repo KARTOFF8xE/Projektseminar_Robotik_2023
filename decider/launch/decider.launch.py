@@ -6,10 +6,10 @@ from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 
-PKG_NAME = "lidar_curb_detection";
+PKG_NAME = "decider";
 
 def generate_launch_description():
-    param_path = LaunchConfiguration("lidar_curb_detection_param_dir", default=os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml"))
+    param_path = LaunchConfiguration("decider_param_dir", default=os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml"))
     log_level = LaunchConfiguration("log_level");
 
     ld = LaunchDescription(
@@ -25,9 +25,11 @@ def generate_launch_description():
 
     ld.add_action(
         Node(
-            package="lidar_curb_detection",
-            executable="lidar_curb_detection",
-            parameters=[param_path],
+            package=PKG_NAME,
+            executable=PKG_NAME,
+            parameters=[
+                param_path
+            ],
             arguments=["--ros-args", "--log-level", log_level],
 
             output="screen",
