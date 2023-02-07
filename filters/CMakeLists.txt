@@ -27,6 +27,7 @@ set(LIB_SOURCES "")
 list(APPEND LIB_SOURCES "src/color_filter.cpp")
 list(APPEND LIB_SOURCES "src/range_filter.cpp")
 list(APPEND LIB_SOURCES "src/encoding_filter.cpp")
+list(APPEND LIB_SOURCES "src/post_filters.cpp")
 
 add_library(${PROJECT_NAME}_lib "include/${PROJECT_NAME}/filters.hpp" ${LIB_SOURCES})
 ament_target_dependencies(${PROJECT_NAME}_lib sensor_msgs)

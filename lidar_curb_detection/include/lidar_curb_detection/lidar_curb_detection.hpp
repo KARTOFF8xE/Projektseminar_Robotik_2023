@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <tuple>
+#include "filters/post_filters.hpp"
 
 namespace lidar_curb_det {
     struct lidar_measures {
@@ -9,17 +10,6 @@ namespace lidar_curb_det {
         double distance;
         // height of the vertical line
         double height;
-    };
-
-    struct limit {
-        // left Limit
-        double left;
-        // right Limit
-        double right;
-        // average distance left limit
-        double avg_dist_left = 0;
-        // average distance right limit
-        double avg_dist_right = 0;
     };
 
     /**
@@ -93,23 +83,6 @@ namespace lidar_curb_det {
     );
 
     /**
-     * Absolut-Values check for a Curbstone    
-     * 
-     * @param height_line: the in "get_height_line" transformed height line
-     * @param height_diff: defines the needed height difference [in meters] between the road and the curbstone
-     * 
-     * @returns left and/or right distance to curbstone as lidar_curb_det::limit-struct (from horizontal Robot-Center) if existing. Returning -1 per side if not existing fot the side
-    */
-    lidar_curb_det::limit curbstone_checker_absolut(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
-        double height_diff,
-        size_t max_check_length,
-        double advanced_ray_check_thr,
-        double wheel_inside,
-        double wheel_width
-    );
-
-    /**
      * Get Angle between 2 Vectors
      * 
      * @param v1: first Vector
@@ -130,7 +103,7 @@ namespace lidar_curb_det {
      * 
      * @returns left and/or right distance to curbstone as lidar_curb_det::limit-struct (from horizontal Robot-Center) if existing. Returning -1 per side if not existing fot the side
     */
-    lidar_curb_det::limit curbstone_checker_vectors(
+    filters::limit curbstone_checker_vectors(
         std::vector<lidar_curb_det::lidar_measures> height_line,
         double height_diff,
         double angle_threshold,
@@ -139,88 +112,33 @@ namespace lidar_curb_det {
         double wheel_inside
     );
 
-    /**
-     * Filtering away RunAways
-     * 
-     * @param limits_vec: a Vector where the Limits of all records are inside
-     * @param distance_thr: the maximum distance a Limit should be to be a valid neighbour
-     * @param quantity_check: the quantity of Values in any direction that will be compared. So at the end we are comparing with (2*quantity_check+1) values
-     * @param quantity_thr: the minimum quantity of neighbours that need to exist to be a valid Limit
-     * @param i: Index to Limit_Pair that should be checked
-     * 
-     * returns a single limit_pair
-    */
-    lidar_curb_det::limit filter_for_runaways(
-        std::vector<lidar_curb_det::limit> limit_vec,
-        double distance_thr,
-        size_t quantity_check,
-        size_t quantity_thr,
-        size_t i
-    );
+    // /**
+    //  * Visualizing Data
+    //  * 
+    //  * @param height_line: the in "get_height_line" transformed height line
+    //  * @param left_border: the left Limit of the way driven on
+    //  * @param right_border: the right Limit of the way driven on
+    //  * 
+    //  * @returns nothing
+    // */
+    // void visualize_cross_section(
+    //     std::vector<lidar_curb_det::lidar_measures> height_line,
+    //     double left_border,
+    //     double right_border,
+    //     double wheel_inside,
+    //     double wheel_width
+    // );
 
-    /**
-     * Calculating the average Distance from the limits before and behind the looked-up Value
-     * 
-     * @param limits_vec: a Vector where the Limits of all records are inside
-     * @param quantity_check: amount of Limits that is checked in each direction (before and behind)
-     * @param counter_thr: minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
-     * @param avg_dist_thr: distance-averages below this Threshold are validating the Limit
-     * @param i: Index to Limit_Pair that should be checked
-     * 
-     * @returns a single limit_pair with belonging distance_average (if existing, otherwise: -1)
-    */
-    lidar_curb_det::limit get_avg_dist(
-        std::vector<lidar_curb_det::limit> limits_vec,
-        size_t quantity_check,
-        size_t counter_thr,
-        double avg_dist_thr,
-        size_t i
-    );
-
-    /**
-     * Scanning a set of Values for the quantity of valid Values, if there are to less valid Values, the checked limit-object will be made invalid
-     * 
-     * @param limits_vec: a Vector where the Limits of all records are inside
-     * @param quantity_check: amount of Limits that is checked in each direction (before and behind)
-     * @param counter_thr: minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
-     * @param i: Index to Limit_Pair that should be checked
-     * 
-     * @returns a single limit_pair with belonging distance_average
-    */
-    lidar_curb_det::limit check_for_valid_island(
-        std::vector<lidar_curb_det::limit> limits_vec,
-        size_t quantity_check,
-        size_t counter_thr,
-        size_t i
-    );
-
-    /**
-     * Visualizing Data
-     * 
-     * @param height_line: the in "get_height_line" transformed height line
-     * @param left_border: the left Limit of the way driven on
-     * @param right_border: the right Limit of the way driven on
-     * 
-     * @returns nothing
-    */
-    void visualize_cross_section(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
-        double left_border,
-        double right_border,
-        double wheel_inside,
-        double wheel_width
-    );
-
-    /**
-     * Get the Streetview from the recorded Data
-     * 
-     * @param limits_vec: a Vector where the Limits of all records are inside
-     * 
-     * @returns nothing
-    */
-    void visualize_street_view(
-        std::vector<lidar_curb_det::limit> limits_vec,
-        double wheel_inside,
-        double wheel_width
-    );
+    // /**
+    //  * Get the Streetview from the recorded Data
+    //  * 
+    //  * @param limits_vec: a Vector where the Limits of all records are inside
+    //  * 
+    //  * @returns nothing
+    // */
+    // void visualize_street_view(
+    //     std::vector<filters::limit> limits_vec,
+    //     double wheel_inside,
+    //     double wheel_width
+    // );
 }
