@@ -2,8 +2,10 @@ lidar_curb_detection:
   ros__parameters:
     _: null #placeholder/dummy
     # topics:
-    #   subscribe_topic:  
-    #   publish_topic:
+    #   flux:
+    #   dmc:
+    #     laserscan:  
+    #   pub:
     # robot_specific:
     #   wheel_inside:                 # Width of the Wheels   
     #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
