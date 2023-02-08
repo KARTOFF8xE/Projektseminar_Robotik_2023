@@ -10,7 +10,7 @@
 
 class Node: public rclcpp::Node {
     public:
-        Node();
+        Node(bool do_visualize);
     private:
         void callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
 
@@ -40,5 +40,6 @@ class Node: public rclcpp::Node {
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr    sub;
     rclcpp::Publisher<custom_msgs::msg::Distance>::SharedPtr        pub;
 
+    bool do_visualize;
     std::vector<filters::limit> limits_vec;
 };

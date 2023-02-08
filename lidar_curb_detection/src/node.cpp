@@ -9,7 +9,7 @@
 
 using std::placeholders::_1;
 
-Node::Node(): rclcpp::Node("lidar_curb_detection") {
+Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<std::string>("topics.dmc.laserscan",            "/sick/scan");
     this->declare_parameter<std::string>("topics.pub",                      "/lidar_path_width");
     this->declare_parameter<double> ("robot_specific.wheel_inside",         .2854);             // Distance of the vertical Plane in the center of the Robot to the verical inside Plane of the Wheels
@@ -51,6 +51,8 @@ Node::Node(): rclcpp::Node("lidar_curb_detection") {
     this->get_parameter("island.quantity_check",                custom_parameters.quantity_check_for_island);
     this->get_parameter("island.counter_thr",                   custom_parameters.counter_thr_for_island);
 
+    this->do_visualize = do_visualize;
+
     this->sub = this->create_subscription<sensor_msgs::msg::LaserScan>(custom_parameters.sub_topic, rclcpp::SensorDataQoS(), std::bind(&Node::callback, this, _1));
     this->pub = this->create_publisher<custom_msgs::msg::Distance>(custom_parameters.pub_topic, rclcpp::SystemDefaultsQoS());
 }
@@ -89,11 +91,11 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
         limits_vec[i] = filters::check_for_valid_island(limits_vec, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
     }
 
-    // /*** Visualize anything, if wanted ***/
-    // if (this->do_visualize) {
-    //     lidar_curb_det::visualize_cross_section(height_line, limit.left, limit.right, custom_parameters.wheel_inside, custom_parameters.wheel_width);
-    //     lidar_curb_det::visualize_street_view(limits_vec, custom_parameters.wheel_inside, custom_parameters.wheel_width);
-    // }
+    /*** Visualize anything, if wanted ***/
+    if (this->do_visualize) {
+         lidar_curb_det::visualize_cross_section(height_line, limit.left, limit.right, custom_parameters.wheel_inside, custom_parameters.wheel_width);
+    //    lidar_curb_det::visualize_street_view(limits_vec, custom_parameters.wheel_inside, custom_parameters.wheel_width);
+    }
 
     /*** Written Output (filtered) ***/
     u_int min_quantity_of_values = (2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1) + (2 * custom_parameters.quantity_check_for_island + 1);
