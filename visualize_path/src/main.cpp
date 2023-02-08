@@ -7,14 +7,12 @@
 // }
 
 int main(int argc, char* argv[]) {
-    // rclcpp::init(argc, argv);
-    // std::shared_ptr<Node> node_ptr = std::make_shared<Node>(do_visualize);
-
-    // // signal(SIGINT, sigint_callback);
+    rclcpp::init(argc, argv);
+    std::shared_ptr<Node> node_ptr = std::make_shared<Node>();
     
 
-    // rclcpp::spin(node_ptr);
-    // rclcpp::shutdown();
+    rclcpp::spin(node_ptr);
+    rclcpp::shutdown();
     
     return 0;
 }

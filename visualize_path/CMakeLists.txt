@@ -17,6 +17,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(custom_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(filters REQUIRED)
 find_package(OpenCV REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -31,7 +33,7 @@ list(APPEND SOURCES "src/node.cpp")
 list(APPEND SOURCES "src/visualize_path.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} filters::filters_lib)
 add_definitions(-O3)
 ament_target_dependencies(${PROJECT_NAME} rclcpp custom_msgs)
 
