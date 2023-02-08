@@ -1,4 +1,5 @@
 #include "node.hpp"
+
 #include "lidar_curb_detection.hpp"
 #include "filters/post_filters.hpp"
 
@@ -9,8 +10,8 @@
 using std::placeholders::_1;
 
 Node::Node(): rclcpp::Node("lidar_curb_detection") {
-    this->declare_parameter<std::string>("subscribe_topic", "/sick/scan");
-    this->declare_parameter<std::string>("publish_topic", "/lidar_path_width");
+    this->declare_parameter<std::string>("topics.dmc.laserscan",            "/sick/scan");
+    this->declare_parameter<std::string>("topics.pub",                      "/lidar_path_width");
     this->declare_parameter<double> ("robot_specific.wheel_inside",         .2854);             // Distance of the vertical Plane in the center of the Robot to the verical inside Plane of the Wheels
     this->declare_parameter<double> ("robot_specific.wheel_width",          .1143);             // Width of the Wheels
     this->declare_parameter<double> ("robot_specific.mounting_angle",       M_PI / 6.0);        // 30° //TODO als mounting_angle kommt immer 0 raus :(, Georg traurig
@@ -30,8 +31,8 @@ Node::Node(): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<int>    ("island.counter_thr",                  40);                // island: Needed Quantity of Valid Limits to validate the looked up Limit
     
     
-    this->get_parameter("subscribe_topic",                      custom_parameters.sub_topic);
-    this->get_parameter("publish_topic",                        custom_parameters.pub_topic);
+    this->get_parameter("topics.dmc.laserscan",                 custom_parameters.sub_topic);
+    this->get_parameter("topics.pub",                           custom_parameters.pub_topic);
     this->get_parameter("robot_specific.wheel_inside",          custom_parameters.wheel_inside);
     this->get_parameter("robot_specific.wheel_width",           custom_parameters.wheel_width);
     this->get_parameter("robot_specific.mounting_point",        custom_parameters.mounting_angle);

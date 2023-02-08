@@ -2,15 +2,16 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
-from launch.actions import DeclareLaunchArgument
 
-PKG_NAME = "lidar_curb_detection";
+PKG_NAME = "wayfinding";
 
-def generate_launch_description():
-    param_path = LaunchConfiguration("lidar_curb_detection_param_dir", default=os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml"))
+def generate_launch_description() -> LaunchDescription:
     log_level = LaunchConfiguration("log_level");
+
+    param_path = os.path.join(get_package_share_directory(PKG_NAME), "param/param.yaml");
 
     ld = LaunchDescription(
         (
@@ -23,10 +24,10 @@ def generate_launch_description():
         )
     );
 
-    ld.add_action(
+    ld.add_entity(
         Node(
-            package="lidar_curb_detection",
-            executable="lidar_curb_detection",
+            package=PKG_NAME,
+            executable=PKG_NAME,
             parameters=[param_path],
             arguments=["--ros-args", "--log-level", log_level],
 
