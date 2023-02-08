@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <tuple>
+#include <rclcpp/time.hpp>
 #include "filters/post_filters.hpp"
 
 namespace lidar_curb_det {
@@ -109,7 +110,8 @@ namespace lidar_curb_det {
         double angle_threshold,
         size_t max_check_length,
         double advanced_ray_check_thr,
-        double wheel_inside
+        double wheel_inside,
+        rclcpp::Time tstamp
     );
 
     /**

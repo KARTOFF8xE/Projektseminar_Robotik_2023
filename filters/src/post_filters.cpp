@@ -82,6 +82,7 @@ filters::limit filters::get_avg_dist(std::vector<filters::limit> limits_vec, siz
      * Returning an Object of filters::limit
     */
     return filters::limit {
+        limits_vec[i].timestamp,
         new_left,
         new_right,
         avg_dist_diff_left,
@@ -123,6 +124,7 @@ filters::limit filters::check_for_valid_island(std::vector<filters::limit> limit
      * Returning an Object of filters::limit
     */
     return filters::limit {
+        limits_vec[i].timestamp,
         new_left,
         new_right,
         limits_vec[i].avg_dist_left,

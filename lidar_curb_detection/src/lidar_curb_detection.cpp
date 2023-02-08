@@ -129,7 +129,7 @@ double get_angle(lidar_curb_det::lidar_measures v1, lidar_curb_det::lidar_measur
     return angle;
 }
 
-filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double angle_threshold, size_t max_check_length, double advanced_ray_check_thr, double wheel_inside) {    
+filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double angle_threshold, size_t max_check_length, double advanced_ray_check_thr, double wheel_inside, rclcpp::Time tstamp) {    
     angle_threshold =  M_PI * std::abs(angle_threshold) / 180;
     double left_limit = 0, right_limit = 0;
     size_t i = 0;
@@ -199,7 +199,8 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
     /**
      * Creating a Limit_Pair and returning it
     */
-    return filters::limit{
+    return filters::limit {
+        tstamp,
         left_limit,
         right_limit
     };

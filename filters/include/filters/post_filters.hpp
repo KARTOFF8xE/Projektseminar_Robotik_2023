@@ -1,8 +1,12 @@
 #pragma once
+
 #include <vector>
+#include <rclcpp/time.hpp>
 
 namespace filters {
     struct limit {
+        // time of the measurement
+        rclcpp::Time timestamp;
         // left Limit
         double left;
         // right Limit

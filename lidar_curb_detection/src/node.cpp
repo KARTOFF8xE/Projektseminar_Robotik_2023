@@ -67,7 +67,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     height_line = lidar_curb_det::sort_height_line(height_line);
     
     /*** Calculate Limits (if possible) with the help of the Vectors and add those Limits to a List of Limits ***/
-    filters::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.max_check_length, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside);
+    filters::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.max_check_length, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside, msg->header.stamp);
     this->limits_vec.push_back(limit);
 
     /*** Filter for to high deviations ***/
@@ -108,6 +108,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
         // pub_msg.set__header =  // TODO: Header adden
         pub_msg.left = limits_vec[i].left;
         pub_msg.right = limits_vec[i].right;
+        pub_msg.header.stamp = limits_vec[i].timestamp;
         pub->publish(pub_msg);
     } else {
         RCLCPP_INFO(logger, "Not enough Values, i only have %d of %d", limits_vec.size(), min_quantity_of_values + 1);
