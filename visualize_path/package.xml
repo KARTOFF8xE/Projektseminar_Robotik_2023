@@ -3,11 +3,16 @@
 <package format="3">
   <name>visualize_path</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="georg.muck@student.tu-freiberg.de">georg</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Visualization of the detected path</description>
+  <maintainer email="Johannes-Georg.Kohl@student.tu-freiberg.de">Johannes Kohl</maintainer>
+  <maintainer email="Georg.Muck@student.tu-freiberg.de">Georg Muck</maintainer>
+  <maintainer email="Nico-Paul-Rene.Zumpe@student.tu-freiberg.de">Nico Zumpe</maintainer>
+  <license>WTFPL</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>custom_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
