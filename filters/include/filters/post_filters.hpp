@@ -52,7 +52,7 @@ namespace filters {
         size_t quantity_check,
         size_t counter_thr,
         double avg_dist_thr,
-        size_t i
+        const size_t i
     );
 
     /**
@@ -69,6 +69,6 @@ namespace filters {
         std::vector<filters::limit> limits_vec,
         size_t quantity_check,
         size_t counter_thr,
-        size_t i
+        const size_t i
     );
 }

@@ -36,7 +36,7 @@ filters::limit filters::filter_for_runaways(std::vector<filters::limit> limits_v
     return limit_at_i;
 }
 
-filters::limit filters::get_avg_dist(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, double avg_dist_thr, size_t i) {
+filters::limit filters::get_avg_dist(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, double avg_dist_thr, const size_t i) {
     /**
      * Define useful Variables
     */
@@ -90,7 +90,7 @@ filters::limit filters::get_avg_dist(std::vector<filters::limit> limits_vec, siz
     };
 }
 
-filters::limit filters::check_for_valid_island(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, size_t i) {
+filters::limit filters::check_for_valid_island(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, const size_t i) {
     /**
      * Needed Variables get instantiated and detected, if they are valid
     */
