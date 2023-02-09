@@ -2,10 +2,7 @@ visualize_path:
   ros__parameters:
     _: null #placeholder/dummy
     # topics:
-    #   flux:
-    #   dmc:
-    #     laserscan:  
-    #   pub:
+    #   sub_topic: 
     # robot_specific:
     #   wheel_inside:                 # Width of the Wheels   
     #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
