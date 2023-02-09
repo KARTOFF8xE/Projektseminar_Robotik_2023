@@ -35,7 +35,7 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->get_parameter("topics.pub",                           custom_parameters.pub_topic);
     this->get_parameter("robot_specific.wheel_inside",          custom_parameters.wheel_inside);
     this->get_parameter("robot_specific.wheel_width",           custom_parameters.wheel_width);
-    this->get_parameter("robot_specific.mounting_point",        custom_parameters.mounting_angle);
+    this->get_parameter("robot_specific.mounting_angle",        custom_parameters.mounting_angle);
     this->get_parameter("filter.distance_thr",                  custom_parameters.distance_thr);
     this->get_parameter("filter.quantity_check",                custom_parameters.quantity_check_for_runaways);
     this->get_parameter("filter.quantity_thr",                  custom_parameters.quantity_thr);
@@ -61,7 +61,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     rclcpp::Logger logger = this->get_logger();
 
     /*** Create the Height_Line out of the LiDAR-Data ***/
-    std::vector<lidar_curb_det::lidar_measures> height_line = lidar_curb_det::get_height_line(msg->ranges, msg->angle_increment, msg->range_min, msg->range_max, msg->angle_min, msg->angle_max, M_PI / 6.0); // TODO: ggf Neigungssensor mit einbeziehen?
+    std::vector<lidar_curb_det::lidar_measures> height_line = lidar_curb_det::get_height_line(msg->ranges, msg->angle_increment, msg->range_min, msg->range_max, msg->angle_min, msg->angle_max, custom_parameters.mounting_angle); // TODO: M_PI / 6.0 input kam immer 0 raus @johannes
     
     /*** Sort the Height_Line ***/
     height_line = lidar_curb_det::sort_height_line(height_line);
@@ -94,6 +94,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     /*** Visualize anything, if wanted ***/
     if (this->do_visualize) {
          lidar_curb_det::visualize_cross_section(height_line, limit.left, limit.right, custom_parameters.wheel_inside, custom_parameters.wheel_width);
+        RCLCPP_INFO(logger, "AAAAAAAAAAAAAAAAAAA");
     //    lidar_curb_det::visualize_street_view(limits_vec, custom_parameters.wheel_inside, custom_parameters.wheel_width);
     }
 
