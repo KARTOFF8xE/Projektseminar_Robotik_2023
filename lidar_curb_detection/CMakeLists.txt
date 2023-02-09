@@ -32,11 +32,8 @@ list(APPEND SOURCES "src/main.cpp")
 list(APPEND SOURCES "src/node.cpp")
 list(APPEND SOURCES "src/lidar_curb_detection.cpp")
 
-add_library(${PROJECT_NAME}_lib "src/${PROJECT_NAME}.cpp" "include/${PROJECT_NAME}/${PROJECT_NAME}.hpp")
-target_link_libraries(${PROJECT_NAME}_lib filters::filters_lib)
-
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${PROJECT_NAME}_lib filters::filters_lib)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} filters::filters_lib)
 add_definitions(-O3)
 ament_target_dependencies(${PROJECT_NAME} rclcpp sensor_msgs custom_msgs)
 
@@ -53,22 +50,6 @@ install(
 install(
   DIRECTORY param
   DESTINATION share/${PROJECT_NAME}
-)
-
-ament_export_targets(${PROJECT_NAME}_lib HAS_LIBRARY_TARGET)
-
-install(
-  DIRECTORY include/${PROJECT_NAME}
-  DESTINATION include
-)
-
-install(
-  TARGETS ${PROJECT_NAME}_lib
-  EXPORT ${PROJECT_NAME}_lib
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
 )
 
 ament_package()
