@@ -31,7 +31,7 @@ class Node: public rclcpp::Node {
         u_int angle_thr;
         u_int quantity_thr_for_smoother;
         u_int repetitions;
-        u_int counter_thr;
+        u_int counter_thr_for_avg;
         u_int quantity_check_for_avg_dist;
         u_int quantity_check_for_island;
         u_int counter_thr_for_island;
