@@ -94,7 +94,6 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     /*** Visualize anything, if wanted ***/
     if (this->do_visualize) {
          lidar_curb_det::visualize_cross_section(height_line, limit.left, limit.right, custom_parameters.wheel_inside, custom_parameters.wheel_width);
-        RCLCPP_INFO(logger, "AAAAAAAAAAAAAAAAAAA");
     //    lidar_curb_det::visualize_street_view(limits_vec, custom_parameters.wheel_inside, custom_parameters.wheel_width);
     }
 
