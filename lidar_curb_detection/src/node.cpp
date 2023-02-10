@@ -102,7 +102,8 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     if (limits_vec.size() > (min_quantity_of_values)) {
         size_t i = limits_vec.size() - ((custom_parameters.quantity_check_for_island + 1) + (2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1));
         double dist = (limits_vec[i].left == -1 || limits_vec[i].right == -1) ? -1 : limits_vec[i].left + limits_vec[i].right;
-        RCLCPP_INFO(logger, "Left: %.5f\tRight: %.5f\tDistance: %.2f\tLeft_avg: %.5f\tRight_avg: %.5f", limits_vec[i].left, limits_vec[i].right, dist, limits_vec[i].avg_dist_left, limits_vec[i].avg_dist_right);
+        // RCLCPP_INFO(logger, "Left: %.5f\tRight: %.5f\tDistance: %.2f\tLeft_avg: %.5f\tRight_avg: %.5f", limits_vec[i].left, limits_vec[i].right, dist, limits_vec[i].avg_dist_left, limits_vec[i].avg_dist_right);
+        RCLCPP_INFO(logger, "Quantity of pushed Values: %d", limits_vec.size() - min_quantity_of_values);
 
         auto pub_msg = custom_msgs::msg::Distance();
         pub_msg.header.stamp = limits_vec[i].timestamp;
