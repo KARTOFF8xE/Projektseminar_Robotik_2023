@@ -21,16 +21,10 @@ namespace wayfinding {
             NO_FILTER
         };
 
-        //TODO: CONTINUE
-        // thresholds canny
-        // line length und line gap
-        // filter
-
         //struct for predefiend canny/hough parameters
         //default values represent universal hough parameters for metric generation
         //both resolutions (rho, theta) probably won't need to be changed to they have default values for ease of initialization
         struct parameters_t {
-            //TODO: Warum eigentlich nicht ungefiltert?
             FilterType filter_type  = FilterType::MEDIAN;
             int kernel_size         = 3;
             double center_width     = 20.0;

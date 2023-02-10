@@ -85,7 +85,7 @@ filters::encoding_info_t filters::get_encoding_info(std::string msg_encoding) {
         encoding_info.type = CV_64FC3;
     } else if (msg_encoding == sensor_msgs::image_encodings::TYPE_64FC4) {
         encoding_info.type = CV_64FC4;
-    //Ref: https://stackoverflow.com/questions/33634628/what-is-the-meaning-of-bayer-pattern-code-in-opencv
+    // reference: https://stackoverflow.com/questions/33634628/what-is-the-meaning-of-bayer-pattern-code-in-opencv
     } else if (msg_encoding == sensor_msgs::image_encodings::BAYER_RGGB8) { // BG == RGGB
         encoding_info.type = CV_8UC4;
         encoding_info.conversion  = cv::COLOR_BayerBG2BGR;
@@ -110,8 +110,7 @@ filters::encoding_info_t filters::get_encoding_info(std::string msg_encoding) {
     } else if (msg_encoding == sensor_msgs::image_encodings::BAYER_GRBG16) { // GB == GRBG
         encoding_info.type = CV_16UC4;
         encoding_info.conversion  = cv::COLOR_BayerGB2BGR;
-    //TODO: https://docs.opencv.org/3.4/d8/d01/group__imgproc__color__conversions.html
-    } else if (msg_encoding == sensor_msgs::image_encodings::YUV422) {// UYUV version: http://www.fourcc.org/pixel-format/yuv-uyvy
+    } else if (msg_encoding == sensor_msgs::image_encodings::YUV422) {      // UYUV version: http://www.fourcc.org/pixel-format/yuv-uyvy
         encoding_info.type = CV_8UC3;
         encoding_info.conversion  = cv::COLOR_YUV2BGR_UYVY;
     } else if (msg_encoding == sensor_msgs::image_encodings::YUV422_YUY2) { // YUYV version: http://www.fourcc.org/pixel-format/yuv-yuy2/

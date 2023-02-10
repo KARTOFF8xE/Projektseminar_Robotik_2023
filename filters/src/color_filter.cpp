@@ -5,7 +5,6 @@ cv::Mat filters::create_color_mask(cv::Mat image, cv::Scalar lower_bounds, cv::S
     cv::Mat mask, image_hsv,
             kernel = cv::Mat::ones(5, 5, CV_8UC1);
 
-    //TODO: Evtl. wäre hier COLOR_BGR2HSV ausreichend? (wenn ja, dann predefined_colors anpassen!)
     // (Unterschied: BGR2HSV löst Hue in 0-180 (Grad) und BGR2HSV_FULL in 0-255 auf.)
     cv::cvtColor(image, image_hsv, cv::COLOR_BGR2HSV_FULL);
 
