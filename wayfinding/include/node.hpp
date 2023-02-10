@@ -17,6 +17,8 @@
 #include "zed_interfaces/msg/depth_info_stamped.hpp"
 #include "custom_msgs/msg/distance.hpp"
 
+#include "filters/filters.hpp"
+
 //when callbacks have more then one argument this cast will hide that fact from ros
 #define MAKE_SINGLE_ARGUMENT(msg_type, function_bind) static_cast<std::function<void(const msg_type::SharedPtr)>>(function_bind)
 
@@ -24,7 +26,7 @@
 
 class Node: public rclcpp::Node {
     public:
-        Node();
+        Node(bool visualize);
         #ifdef DEBUG
         ~Node();
         #endif //DEBUG
@@ -47,6 +49,15 @@ class Node: public rclcpp::Node {
             double angle_filter;
             double optimal_line_angle;
             double relative_scan_line_height;
+
+            double distance_thr;
+            int quantity_check_for_runaways;
+            int quantity_thr;
+            int quantity_check_for_avg_dist;
+            int counter_thr_for_avg;
+            double avg_dist_thr;
+            int quantity_check_for_island;
+            int counter_thr_for_island;
         } custom_parameters;
 
         //rclcpp
@@ -57,15 +68,19 @@ class Node: public rclcpp::Node {
         rclcpp::Publisher<custom_msgs::msg::Distance>::SharedPtr                publisher;
 
         //misc
-        std::array<double, 9ul> K;
+        std::array<double, 9ul> K;                              //intrinsic camera  calibration matrix as array
         cv::Mat point_cloud;                                    //point cloud for retrieval of real world coordinates
-        //        K;                                              //intrinsic camera  calibration matrix
         std::optional<cv::Vec3d> euler_angles = std::nullopt;   //pitch, yaw, roll
+        std::vector<filters::limit> limits_buffer;              //filtering buffer for detected limits
+        size_t high_deviations_min_buffer_size,
+               runaways_min_buffer_size,
+               islands_min_buffer_size;
 
-        #ifdef DEBUG
-        //misc
+        //visualization
+        bool do_visualize;
         bool is_run_in_debugger;
 
+        #ifdef DEBUG
         //metric testing
         std::ofstream csv_file;
         #endif //DEBUG

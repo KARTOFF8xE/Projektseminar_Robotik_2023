@@ -40,7 +40,7 @@ cv::Mat wayfinding::line_detection::getHoughLines(cv::Mat& src, std::vector<cv::
  * @return median value
 */
 double getMatrixMedian(const cv::Mat& matrix) {
-    //TODO: Das könnte man bestimmt schöner machen
+    //sanity check
     CV_Assert(matrix.channels() == 1);
 
     std::vector<double> matrix_as_vector;
@@ -236,8 +236,6 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
             x_0 = line[0]; x_1 = line[2];
             intersection_x = ::getLineIntersectionX(x_0, y_0, x_1, y_1, scan_height);
 
-            std::cout << "(" << intersection_x << ", " << min_y << ", " << max_y << ") ";
-
             if (intersection_x < middle && intersection_x > left) { //valid left value if left of middle and greater (more to the right) then the last left
                 left = intersection_x;
             } else if (intersection_x >= middle && intersection_x < right) { //valid right if right of middle and lower (more to the left) then the last right
@@ -245,8 +243,6 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
             }
         }
     }
-
-    std::endl(std::cout);
 
     //if left didn't ever get any valid values it will still be -1 (a non-reachable value)
     //if right didn't ever get any valid values it will still be [width + 1] (a non-reachable value)

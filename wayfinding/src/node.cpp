@@ -1,6 +1,5 @@
 #include "node.hpp"
 
-#include "filters/filters.hpp"
 #include "wayfinding/wayfinding.hpp"
 
 #include "rclcpp/qos.hpp"
@@ -52,7 +51,7 @@ bool isRunByDebugger() {
 #endif //DEBUG
 
 
-Node::Node(): rclcpp::Node("wayfinding") {
+Node::Node(bool visualize): rclcpp::Node("wayfinding") {
     this->declare_parameter<std::string>("topics.flux.camera_info",     "/zed2i_c1/zed_node_c1/rgb/camera_info");
     this->declare_parameter<std::string>("topics.flux.imu",             "/imu/data");
     this->declare_parameter<std::string>("topics.flux.pointcloud",      "/zed2i_c1/zed_node_c1/point_cloud/cloud_registered");
@@ -60,8 +59,16 @@ Node::Node(): rclcpp::Node("wayfinding") {
     this->declare_parameter<std::string>("topics.pub",                  "/camera_path_width");
     this->declare_parameter<double>("params.angle_filter",              75.0);  //minimal angle for a line to not be cast out [°]
     this->declare_parameter<double>("params.optimal_line_angle",        90.0);  //angle that gives the best (lowest) metric values [°]
-    this->declare_parameter<double>("params.rel_scan_line_height",      .33);   //relative height (from bottom) on top down image at which to scan for distances
-    this->declare_parameter<std::string>("debug.metric_output_file",   "metric_table");
+    this->declare_parameter<double>("params.rel_scan_line_height",      0.33);  //relative height (from bottom) on top down image at which to scan for distances
+    this->declare_parameter<double>("params.filter.distance_thr",       0.2);   // filter: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    this->declare_parameter<int>   ("params.filter.quantity_check",     14);    // filter: Amount of Limits that is checked in each direction (before and behind)
+    this->declare_parameter<int>   ("params.filter.quantity_thr",       15);    // filter: Minimum amount of valid Points that needs to lay inside the distance_thr
+    this->declare_parameter<int>   ("params.avg_dist.quantity_check",   15);    // avg_dist: Amount of Limits that is checked in each direction (before and behind)
+    this->declare_parameter<int>   ("params.avg_dist.counter_thr",      12);    // avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
+    this->declare_parameter<double>("params.avg_dist.avg_dist_thr",     0.1);   // avg_dist: distance-averages below this Threshold are validating the Limit
+    this->declare_parameter<int>   ("params.island.quantity_check",     45);    // island: Amount of Limits that is checked in each direction (before and behind)
+    this->declare_parameter<int>   ("params.island.counter_thr",        40);    // island: Needed Quantity of Valid Limits to validate the looked up Limit
+    this->declare_parameter<std::string>("debug.metric_output_file",    "metric_table");
 
     this->get_parameter("topics.flux.camera_info",      custom_parameters.camera_info_topic);
     this->get_parameter("topics.flux.imu",              custom_parameters.imu_topic);
@@ -71,16 +78,29 @@ Node::Node(): rclcpp::Node("wayfinding") {
     this->get_parameter("params.angle_filter",          custom_parameters.angle_filter);
     this->get_parameter("params.optimal_line_angle",    custom_parameters.optimal_line_angle);
     this->get_parameter("params.rel_scan_line_height",  custom_parameters.relative_scan_line_height);
+    this->get_parameter("filter.distance_thr",          custom_parameters.distance_thr);
+    this->get_parameter("filter.quantity_check",        custom_parameters.quantity_check_for_runaways);
+    this->get_parameter("filter.quantity_thr",          custom_parameters.quantity_thr);
+    this->get_parameter("avg_dist.quantity_check",      custom_parameters.quantity_check_for_avg_dist);
+    this->get_parameter("avg_dist.counter_thr",         custom_parameters.counter_thr_for_avg);
+    this->get_parameter("avg_dist.avg_dist_thr",        custom_parameters.avg_dist_thr);
+    this->get_parameter("island.quantity_check",        custom_parameters.quantity_check_for_island);
+    this->get_parameter("island.counter_thr",           custom_parameters.counter_thr_for_island);
     std::string csv_file_name = this->get_parameter("debug.metric_output_file").as_string() + ".csv";
 
 
     //setup misc
     rclcpp::Logger logger = this->get_logger();
 
-    #ifdef DEBUG
-    //check if process is run in gdb
     this->is_run_in_debugger = isRunByDebugger();
+    this->do_visualize = visualize;
+
+    this->high_deviations_min_buffer_size = 2 * custom_parameters.quantity_check_for_runaways + 1;
+    this->runaways_min_buffer_size = this->high_deviations_min_buffer_size + (2 * custom_parameters.quantity_check_for_avg_dist + 1);
+    this->islands_min_buffer_size = this->runaways_min_buffer_size + (2 * custom_parameters.quantity_check_for_island + 1);
+
     
+    #ifdef DEBUG
     //check if metric tracking file is already initialized, meaning it exists and has a header
     bool is_init;
     {
@@ -192,33 +212,32 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
 
     //get hough lines on standard parameters
     wayfinding::line_detection::parameters_t default_algorithm_parameters;
-    std::vector<cv::Vec4i> hough_lines;
-    wayfinding::line_detection::getHoughLines(warped_image, hough_lines, default_algorithm_parameters);
+    std::vector<cv::Vec4i> general_hough_lines;
+    wayfinding::line_detection::getHoughLines(warped_image, general_hough_lines, default_algorithm_parameters);
 
     //calculate metric from standard parameter lines
-    double metric = wayfinding::line_detection::imageMetric(hough_lines, image_size, custom_parameters.optimal_line_angle);
-    RCLCPP_INFO_STREAM(logger, "[rgb image] Metrik: " << metric);
+    double metric = wayfinding::line_detection::imageMetric(general_hough_lines, image_size, custom_parameters.optimal_line_angle);
+    RCLCPP_DEBUG_STREAM(logger, "[rgb image] metric: " << metric);
 
     //get hough lines on metric dependent parameter set
     wayfinding::line_detection::parameters_t algorithm_parameters = wayfinding::line_detection::getParametersFromMetric(metric);
-    std::vector<cv::Vec4i> hough_lines_2; //TODO: get a better name
-    cv::Mat canny = wayfinding::line_detection::getHoughLines(warped_image, hough_lines_2, algorithm_parameters);
+    std::vector<cv::Vec4i> specific_hough_lines;
+    cv::Mat canny = wayfinding::line_detection::getHoughLines(warped_image, specific_hough_lines, algorithm_parameters);
     cv::cvtColor(canny, canny, cv::COLOR_GRAY2BGR);
 
     //filter lines with tube and angle filter to exclude unnecessary lines
     std::vector<cv::Vec4i> filtered_lines;
-    wayfinding::line_detection::lineFilter(hough_lines_2, filtered_lines, image_size.width, default_algorithm_parameters.center_width, custom_parameters.angle_filter);
+    wayfinding::line_detection::lineFilter(specific_hough_lines, filtered_lines, image_size.width, default_algorithm_parameters.center_width, custom_parameters.angle_filter);
 
 
     //get left and right distance coordinates
     int left, right;
     int scan_line_height = (1 - custom_parameters.relative_scan_line_height) * image_size.height;
-    //TODO: hmmmmm iwas is falsch beim ermitteln der x-werte
     std::tie(left, right) = wayfinding::line_detection::getLeftRightDistance(filtered_lines, scan_line_height, image_size.width);
     
-    //create, populate and publish message
-    custom_msgs::msg::Distance result_msg;
-    result_msg.header.set__stamp(msg->header.stamp);
+    //get distances and push to buffer
+    filters::limit current_limit;
+    current_limit.timestamp = msg->header.stamp;
     if (left != -1 || right != -1) {
         cv::Point2i center_point_2d = wayfinding::top_down::unwarpPoint(transformation_matrix, cv::Point2i(image_size.width / 2, scan_line_height));
         cv::Vec3f center_point_3d = this->point_cloud.at<cv::Vec3f>(center_point_2d);
@@ -227,35 +246,60 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
             cv::Point2i left_point_2d = wayfinding::top_down::unwarpPoint(transformation_matrix, cv::Point2i(left, scan_line_height));
             cv::Vec3f left_point_3d = this->point_cloud.at<cv::Vec3f>(left_point_2d);
 
-            result_msg.left = cv::norm(left_point_3d - center_point_3d);
-        } else {
-            result_msg.left = -1;
+            current_limit.left = cv::norm(left_point_3d - center_point_3d);
         }
         if (right != -1) {
             cv::Point2i right_point_2d = wayfinding::top_down::unwarpPoint(transformation_matrix, cv::Point2i(right, scan_line_height));
             cv::Vec3f right_point_3d = this->point_cloud.at<cv::Vec3f>(right_point_2d);
 
-            result_msg.right = cv::norm(right_point_3d - center_point_3d);
-        } else {
-            result_msg.right = -1;
+            current_limit.right = cv::norm(right_point_3d - center_point_3d);
         }
-    } else {
-        result_msg.left = -1;
-        result_msg.right = -1;
+    }
+    limits_buffer.push_back(current_limit);
+    size_t buffer_size = limits_buffer.size();
+
+    //filter for too high deviations
+    if (buffer_size > this->high_deviations_min_buffer_size) {
+        size_t i = buffer_size - (this->high_deviations_min_buffer_size - custom_parameters.quantity_check_for_runaways);
+        limits_buffer[i] = filters::get_avg_dist(limits_buffer, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr_for_avg, custom_parameters.avg_dist_thr, i);
     }
 
-    this->publisher->publish(result_msg);
+    //filter for runaways
+    if (buffer_size > this->runaways_min_buffer_size) {
+        size_t i = buffer_size - (this->runaways_min_buffer_size - custom_parameters.quantity_check_for_runaways);
+        limits_buffer[i] = filters::filter_for_runaways(limits_buffer, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
+    } 
+
+    //filter for islands
+    // if (buffer_size > this->islands_min_buffer_size) {
+    //     size_t i = buffer_size - (this->islands_min_buffer_size - custom_parameters.quantity_check_for_runaways);
+    //     limits_buffer[i] = filters::check_for_valid_island(limits_buffer, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
+    // }
+
+    if (limits_buffer.size() > this->islands_min_buffer_size) {
+        size_t i = buffer_size - (this->islands_min_buffer_size - custom_parameters.quantity_check_for_runaways);
+
+        //create, populate and publish message
+        custom_msgs::msg::Distance result_msg;
+        result_msg.header.set__stamp(limits_buffer[i].timestamp);
+        result_msg.set__left(limits_buffer[i].left);
+        result_msg.set__right(limits_buffer[i].right);
+        this->publisher->publish(result_msg);
+    } else {
+        RCLCPP_DEBUG_STREAM(logger, "[rgb image] Not enough values yet. Still needing " << this->islands_min_buffer_size + 1 - buffer_size << " elements.");
+    }
 
 
     #ifdef DEBUG
     //write csv line with metric and line counts for current image
-    this->csv_file << '\n' << rclcpp::Time(msg->header.stamp.sec).nanoseconds() << ';' << metric << ';' << hough_lines.size() << ';' << filtered_lines.size();
+    this->csv_file << '\n' << rclcpp::Time(msg->header.stamp.sec).nanoseconds() << ';' << metric << ';' << general_hough_lines.size() << ';' << filtered_lines.size();
+    #endif //DEBUG
 
     //show images if logging verbosity is set to debug and no debugger (e.g. gdb) is running this program
-    if (!this->is_run_in_debugger) { //debuggers sometimes can not foreward this call (e.g. gdb)
+    if (this->do_visualize && !this->is_run_in_debugger) { //debuggers sometimes can not foreward this call (e.g. gdb)
         //draw indicator lines
         wayfinding::top_down::drawVanishingLines(image, vanishing_point, trapeze);
-        wayfinding::line_detection::drawLines(canny, hough_lines_2, cv::Scalar(0, 0, 255));
+        wayfinding::line_detection::drawLines(canny, specific_hough_lines, cv::Scalar(0, 0, 255));
         wayfinding::line_detection::drawLines(warped_image, filtered_lines, cv::Scalar(255, 0, 0));
 
         //draw tube filter lines
@@ -285,5 +329,4 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
             rclcpp::shutdown();
         }
     }
-    #endif //DEBUG
 }

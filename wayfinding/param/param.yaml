@@ -10,7 +10,19 @@ wayfinding:
       # dmc:
       # pub: "/path_width"
     # params:
-      # angle_filter: 75.0
-      # params.optimal_line_angle: 90.0
+      # angle_filter:         75.0
+      # optimal_line_angle:   90.0
+      # rel_scan_line_height: 0.33
+      # filter:
+      #   distance_thr:       0.2
+      #   quantity_check:     14
+      #   quantity_thr:       15
+      # avg_dist:
+      #   quantity_check:     15
+      #   counter_thr:        12
+      #   avg_dist_thr:       0.1
+      # island:
+      #   quantity_check:     45
+      #   counter_thr:        40
     # debug:
       # metric_output_file: "metric_table"

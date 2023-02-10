@@ -40,7 +40,7 @@ def generate_launch_description() -> LaunchDescription:
     replay_rate = LaunchConfiguration("bag_rate");
     flux = LaunchConfiguration("flux");
     dmc = LaunchConfiguration("dmc");
-    visualize = LaunchConfiguration("do_visualize");
+    visualize = LaunchConfiguration("visualize");
     log_level = LaunchConfiguration("log_level");
     use_gdb = LaunchConfiguration("use_gdb");
     echo_output = LaunchConfiguration("echo_output");
@@ -75,7 +75,7 @@ def generate_launch_description() -> LaunchDescription:
                 description="Playback dmc_11 ros2 bag file."
             ),
             DeclareLaunchArgument(
-                "do_visualize",
+                "visualize",
                 default_value='False',
                 choices=["True", "False"],
                 description="Turn visualization on or off."
