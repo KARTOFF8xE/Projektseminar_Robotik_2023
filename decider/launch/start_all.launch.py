@@ -5,9 +5,15 @@ import typing
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import LaunchConfigurationNotEquals
+from launch.conditions import LaunchConfigurationNotEquals, LaunchConfigurationEquals
 from launch.substitutions import LaunchConfiguration
 from launch.actions import ExecuteProcess, DeclareLaunchArgument, LogInfo, IncludeLaunchDescription, GroupAction
+
+#output visualization mdoes:
+BOTH    = "both";
+LIDAR   = "lidar";
+CAMERA  = "camera";
+NONE    = "none";
 
 #load default topic maps
 def load_topics(default_path: str) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str]]:
@@ -16,11 +22,12 @@ def load_topics(default_path: str) -> typing.Tuple[typing.Dict[str, str], typing
 
     flux_topic_map  = defaults.get("flux") or {};
     dmc_topic_map   = defaults.get("dmc") or {};
+    pub_topic       = defaults["pub"]; #error when pub does not exist since it MUST have a default publishing topic
 
-    return flux_topic_map, dmc_topic_map;
+    return flux_topic_map, dmc_topic_map, pub_topic;
 
 #topic updater in case the parameter file specifies different topics
-def update_topics(param_path: str, pkg_name: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str]) -> typing.Tuple[typing.List[str] , typing.List[str], str]:
+def update_topics(param_path: str, pkg_name: str, flux_topic_map: typing.Dict[str, str], dmc_topic_map: typing.Dict[str, str], pub_topic: str) -> typing.Tuple[typing.List[str] , typing.List[str], str]:
     with open(param_path, 'r') as param_yaml:
         params: dict = yaml.safe_load(param_yaml);
         params = params[pkg_name]["ros__parameters"];
@@ -29,8 +36,9 @@ def update_topics(param_path: str, pkg_name: str, flux_topic_map: typing.Dict[st
         topics = params["topics"];
         if "flux" in topics: flux_topic_map.update(topics["flux"]);
         if "dmc" in topics: dmc_topic_map.update(topics["dmc"]);
+        if "pub" in topics: pub_topic = topics["pub"];
 
-    return set(flux_topic_map.values()), set(dmc_topic_map.values());
+    return set(flux_topic_map.values()), set(dmc_topic_map.values()), pub_topic;
 
 def generate_launch_description():
     bag_dir = LaunchConfiguration("bag_dir");
@@ -38,15 +46,17 @@ def generate_launch_description():
     flux = LaunchConfiguration("flux");
     dmc = LaunchConfiguration("dmc");
     do_debug_visualize = LaunchConfiguration("debug_visualize");
+    do_output_visualize = LaunchConfiguration("output_visualize");
     log_level = LaunchConfiguration("log_level");
 
+    visualization_share_dir = get_package_share_directory("visualize_path");
+    visualization_launch_file = os.path.join(visualization_share_dir, "launch/sublaunch.visualize_path.launch.py");
     lidar_curb_detection_share_dir  = get_package_share_directory("lidar_curb_detection");
-    lidar_curb_detection_flux_topic_map, lidar_curb_detection_dmc_topic_map = load_topics(os.path.join(lidar_curb_detection_share_dir, "launch/default_topics.yaml"));
-    lidar_curb_detection_flux_topic_set, lidar_curb_detection_dmc_topic_set = update_topics(os.path.join(lidar_curb_detection_share_dir, "param/param.yaml"), "lidar_curb_detection", lidar_curb_detection_flux_topic_map, lidar_curb_detection_dmc_topic_map);
+    lidar_curb_detection_flux_topic_map, lidar_curb_detection_dmc_topic_map, lidar_curb_detection_pub_topic = load_topics(os.path.join(lidar_curb_detection_share_dir, "launch/default_topics.yaml"));
+    lidar_curb_detection_flux_topic_set, lidar_curb_detection_dmc_topic_set, lidar_curb_detection_pub_topic = update_topics(os.path.join(lidar_curb_detection_share_dir, "param/param.yaml"), "lidar_curb_detection", lidar_curb_detection_flux_topic_map, lidar_curb_detection_dmc_topic_map, lidar_curb_detection_pub_topic);
     wayfinding_share_dir            = get_package_share_directory("wayfinding");
-    print(wayfinding_share_dir)
-    wayfinding_flux_topic_map, wayfinding_dmc_topic_map                     = load_topics(os.path.join(wayfinding_share_dir, "launch/default_topics.yaml"));
-    wayfinding_flux_topic_set, wayfinding_dmc_topic_set                     = update_topics(os.path.join(wayfinding_share_dir, "param/param.yaml"), "wayfinding", wayfinding_flux_topic_map, wayfinding_dmc_topic_map);
+    wayfinding_flux_topic_map, wayfinding_dmc_topic_map, wayfinding_pub_topic                               = load_topics(os.path.join(wayfinding_share_dir, "launch/default_topics.yaml"));
+    wayfinding_flux_topic_set, wayfinding_dmc_topic_set, wayfinding_pub_topic                               = update_topics(os.path.join(wayfinding_share_dir, "param/param.yaml"), "wayfinding", wayfinding_flux_topic_map, wayfinding_dmc_topic_map, wayfinding_pub_topic);
     flux_topics = list(set.union(lidar_curb_detection_flux_topic_set, wayfinding_flux_topic_set));
     dmc_topics  = list(set.union(lidar_curb_detection_dmc_topic_set, wayfinding_dmc_topic_set));
 
@@ -59,7 +69,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "bag_rate",
-                default_value='1.0',
+                default_value="1.0",
                 description="Rate at which to play back messages. Valid range > 0.0"
             ),
             DeclareLaunchArgument(
@@ -73,14 +83,20 @@ def generate_launch_description():
                 description="Playback dmc_11 ros2 bag file."
             ),
             DeclareLaunchArgument(
-                "visualize",
-                default_value='False',
+                "debug_visualize",
+                default_value="False",
                 choices=["True", "False"],
-                description="Turn visualization on or off."
+                description="Turn debug visualization on or off."
+            ),
+            DeclareLaunchArgument(
+                "output_visualize",
+                default_value=NONE,
+                choices=[BOTH, LIDAR, CAMERA, NONE],
+                description="Turn on output visualization for lidar, camera or both."
             ),
             DeclareLaunchArgument(
                 "log_level",
-                default_value='info',
+                default_value="info",
                 choices=["debug", "info", "warn", "error", "fatal"],
                 description="Set log level to node logger."
             ),
@@ -181,5 +197,59 @@ def generate_launch_description():
                 )
             )
         )
+
+    ld.add_action(
+        GroupAction(
+            condition=LaunchConfigurationEquals(
+                "output_visualize", BOTH
+            ),
+            actions=(
+                IncludeLaunchDescription(
+                    launch_description_source=PythonLaunchDescriptionSource(
+                        visualization_launch_file
+                    ),
+                    launch_arguments={
+                        "topic": lidar_curb_detection_pub_topic
+                    }.items()
+                ),
+                IncludeLaunchDescription(
+                    launch_description_source=PythonLaunchDescriptionSource(
+                        visualization_launch_file
+                    ),
+                    launch_arguments={
+                        "topic": wayfinding_pub_topic
+                    }.items()
+                )
+            )
+        )
+    )
+
+    ld.add_action(
+        IncludeLaunchDescription(
+            condition=LaunchConfigurationEquals(
+                "output_visualize", LIDAR
+            ),
+            launch_description_source=PythonLaunchDescriptionSource(
+                visualization_launch_file
+            ),
+            launch_arguments={
+                "topic": lidar_curb_detection_pub_topic
+            }.items()
+        )
+    );
+
+    ld.add_action(
+        IncludeLaunchDescription(
+            condition=LaunchConfigurationEquals(
+                "output_visualize", CAMERA
+            ),
+            launch_description_source=PythonLaunchDescriptionSource(
+                visualization_launch_file
+            ),
+            launch_arguments={
+                "topic": wayfinding_pub_topic
+            }.items()
+        )
+    )
 
     return ld
