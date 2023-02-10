@@ -8,8 +8,7 @@
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
-    std::shared_ptr<Node> node_ptr = std::make_shared<Node>();
-    
+    std::shared_ptr<Node> node_ptr = std::make_shared<Node>(std::string(argv[1]));
 
     rclcpp::spin(node_ptr);
     rclcpp::shutdown();

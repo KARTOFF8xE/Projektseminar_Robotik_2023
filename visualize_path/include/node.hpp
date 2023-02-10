@@ -9,13 +9,11 @@
 
 class Node: public rclcpp::Node {
     public:
-        Node();
+        Node(std::string sub_topic);
     private:
         void callback(const custom_msgs::msg::Distance::SharedPtr msg);
 
     struct custom_parameters_t {
-        std::string sub_topic;
-
         double wheel_inside;
         double wheel_width;
     } custom_parameters;
