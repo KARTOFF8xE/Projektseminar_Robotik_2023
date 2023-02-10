@@ -101,7 +101,7 @@ def generate_launch_description():
     ld.add_action(
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(
-                os.path.join(lidar_curb_detection_share_dir, "launch/lidar_curb_detection.sublaunch.launch.py")
+                os.path.join(lidar_curb_detection_share_dir, "launch/sublaunch.lidar_curb_detection.launch.py")
             ),
             launch_arguments={
                 "log_level": log_level,
@@ -113,7 +113,7 @@ def generate_launch_description():
     ld.add_action(
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(
-                os.path.join(wayfinding_share_dir, "launch/wayfinding.sublaunch.launch.py")
+                os.path.join(wayfinding_share_dir, "launch/sublaunch.wayfinding.launch.py")
             ),
             launch_arguments={
                 "log_level": log_level,
