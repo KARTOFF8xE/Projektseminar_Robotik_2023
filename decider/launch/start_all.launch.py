@@ -37,6 +37,7 @@ def generate_launch_description():
     replay_rate = LaunchConfiguration("bag_rate");
     flux = LaunchConfiguration("flux");
     dmc = LaunchConfiguration("dmc");
+    do_debug_visualize = LaunchConfiguration("debug_visualize");
     log_level = LaunchConfiguration("log_level");
 
     lidar_curb_detection_share_dir  = get_package_share_directory("lidar_curb_detection");
@@ -72,6 +73,12 @@ def generate_launch_description():
                 description="Playback dmc_11 ros2 bag file."
             ),
             DeclareLaunchArgument(
+                "visualize",
+                default_value='False',
+                choices=["True", "False"],
+                description="Turn visualization on or off."
+            ),
+            DeclareLaunchArgument(
                 "log_level",
                 default_value='info',
                 choices=["debug", "info", "warn", "error", "fatal"],
@@ -97,7 +104,8 @@ def generate_launch_description():
                 os.path.join(lidar_curb_detection_share_dir, "launch/lidar_curb_detection.sublaunch.launch.py")
             ),
             launch_arguments={
-                "log_level": log_level
+                "log_level": log_level,
+                "visualize": do_debug_visualize,
             }.items()
         )
     );
@@ -108,7 +116,8 @@ def generate_launch_description():
                 os.path.join(wayfinding_share_dir, "launch/wayfinding.sublaunch.launch.py")
             ),
             launch_arguments={
-                "log_level": log_level
+                "log_level": log_level,
+                "visualize": do_debug_visualize,
             }.items()
         )
     );
