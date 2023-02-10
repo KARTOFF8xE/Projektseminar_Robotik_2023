@@ -40,6 +40,7 @@ def generate_launch_description() -> LaunchDescription:
     replay_rate = LaunchConfiguration("bag_rate");
     flux = LaunchConfiguration("flux");
     dmc = LaunchConfiguration("dmc");
+    visualize = LaunchConfiguration("do_visualize");
     log_level = LaunchConfiguration("log_level");
     use_gdb = LaunchConfiguration("use_gdb");
     echo_output = LaunchConfiguration("echo_output");
@@ -72,6 +73,12 @@ def generate_launch_description() -> LaunchDescription:
                 "dmc",
                 default_value='',
                 description="Playback dmc_11 ros2 bag file."
+            ),
+            DeclareLaunchArgument(
+                "do_visualize",
+                default_value='False',
+                choices=["True", "False"],
+                description="Turn visualization on or off."
             ),
             DeclareLaunchArgument(
                 "log_level",
@@ -162,36 +169,14 @@ def generate_launch_description() -> LaunchDescription:
 
     ld.add_entity(
         Node(
-            condition=IfCondition(
-                use_gdb
-            ),
             on_exit=[global_exit],
 
             package=PKG_NAME,
             executable=PKG_NAME,
             parameters=[param_path],
-            arguments=["--ros-args", "--log-level", log_level],
+            arguments=[PythonExpression(["\"-v\" if ", visualize, " else ''"]), "--ros-args", "--log-level", log_level],
 
-            prefix=["gnome-terminal --wait -- gdb -q --args"],
-            output="screen",
-            emulate_tty=True,
-            shell=True
-        )
-    );
-    ld.add_entity(
-        Node(
-            condition=IfCondition(
-                PythonExpression([
-                    "not ", use_gdb
-                ])
-            ),
-            on_exit=[global_exit],
-
-            package=PKG_NAME,
-            executable=PKG_NAME,
-            parameters=[param_path],
-            arguments=["--ros-args", "--log-level", log_level],
-
+            prefix=[PythonExpression(["\"gnome-terminal --wait -- gdb -q --args\" if ", use_gdb, " else ''"])],
             output="screen",
             emulate_tty=True,
             shell=True
