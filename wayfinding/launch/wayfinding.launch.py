@@ -4,7 +4,7 @@ import typing
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, DeclareLaunchArgument, Shutdown, LogInfo
+from launch.actions import ExecuteProcess, DeclareLaunchArgument, Shutdown, LogInfo, GroupAction
 from launch.conditions import IfCondition, LaunchConfigurationNotEquals
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -102,68 +102,62 @@ def generate_launch_description() -> LaunchDescription:
     );
 
     if flux_topics:
-        ld.add_entity(
-            LogInfo(
+        ld.add_action(
+            GroupAction(
                 condition=LaunchConfigurationNotEquals(
                     "flux", ''
                 ),
-                msg="flux topics: " + ", ".join(flux_topics)
-            )
-        )
-        ld.add_entity(
-            ExecuteProcess(
-                condition=LaunchConfigurationNotEquals(
-                    "flux", ''
-                ),
-                on_exit=[global_exit],
+                actions=(
+                    LogInfo(
+                        msg="flux topics: " + ", ".join(flux_topics)
+                    ),
+                    ExecuteProcess(
+                        name="flux_bag",
 
-                name="flux_bag",
+                        cwd=bag_dir,
+                        cmd=[
+                            "ros2", "bag",  "play",
+                            flux,
+                            "--rate", replay_rate,
+                            "--loop",
+                            "--topics"
+                        ] + flux_topics,
 
-                cwd=bag_dir,
-                cmd=[
-                    "ros2", "bag",  "play",
-                    flux,
-                    "--rate", replay_rate,
-                    "--loop",
-                    "--topics"
-                ] + flux_topics,
-
-                output="screen",
-                emulate_tty=True,
-                shell=True
+                        output="screen",
+                        emulate_tty=True,
+                        shell=True
+                    )
+                )
             )
         );
 
     if dmc_topics:
-        ld.add_entity(
-            LogInfo(
+        ld.add_action(
+            GroupAction(
                 condition=LaunchConfigurationNotEquals(
                     "dmc", ''
                 ),
-                msg="dmc topics: " + ", ".join(dmc_topics)
-            )
-        )
-        ld.add_entity(
-            ExecuteProcess(
-                condition=LaunchConfigurationNotEquals(
-                    "dmc", ''
-                ),
-                on_exit=[global_exit],
+                actions=(
+                    LogInfo(
+                        msg="dmc topics: " + ", ".join(dmc_topics)
+                    ),
+                    ExecuteProcess(
+                        name="dmc_bag",
 
-                name="dmc_bag",
+                        cwd=bag_dir,
+                        cmd=[
+                            "ros2", "bag",  "play",
+                            dmc,
+                            "--rate", replay_rate,
+                            "--loop",
+                            "--topics"
+                        ] + dmc_topics,
 
-                cwd=bag_dir,
-                cmd=[
-                    "ros2", "bag",  "play",
-                    dmc,
-                    "--rate", replay_rate,
-                    "--loop",
-                    "--topics"
-                ] + dmc_topics,
-
-                output="screen",
-                emulate_tty=True,
-                shell=True
+                        output="screen",
+                        emulate_tty=True,
+                        shell=True
+                    )
+                )
             )
         );
 
