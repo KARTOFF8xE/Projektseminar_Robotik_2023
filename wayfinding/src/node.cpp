@@ -261,7 +261,7 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
     //filter for too high deviations
     if (buffer_size > this->high_deviations_min_buffer_size) {
         size_t i = buffer_size - (this->high_deviations_min_buffer_size - custom_parameters.quantity_check_for_runaways);
-        limits_buffer[i] = filters::get_avg_dist(limits_buffer, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr_for_avg, custom_parameters.avg_dist_thr, i);
+        limits_buffer[i] = filters::noise_filter(limits_buffer, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr_for_avg, custom_parameters.avg_dist_thr, i);
     }
 
     //filter for runaways
