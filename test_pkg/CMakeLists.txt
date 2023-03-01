@@ -32,7 +32,7 @@ list(APPEND SOURCES "src/src.cpp")
 
 add_executable(test_pkg ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} filters::filters_lib)
-add_definitions(-O3)
+#add_definitions(-O3)
 ament_target_dependencies(test_pkg rclcpp sensor_msgs)
 
 install(TARGETS

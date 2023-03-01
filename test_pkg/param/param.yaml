@@ -5,6 +5,7 @@ test_pkg:
         camera_info:  "/zed2i_c1/zed_node_c1/rgb/camera_info"
         imu:          "/imu/data"
         pointcloud:   "/zed2i_c1/zed_node_c1/point_cloud/cloud_registered"
+        odometry:     "/odom"
         rgb_image:    "/zed2i_c1/zed_node_c1/rgb/image_rect_color"
       dmc:
         _: null #dummy

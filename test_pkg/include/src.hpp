@@ -81,15 +81,41 @@ namespace src {
     );
 
     /**
+     * Transform point in original perspective to point in warped perspective.
+     * 
+     * @param transformation_matrix: M
+     * @param: to be warped point
+     * 
+     * @return warped point
+    */
+    cv::Point2i warpPoint(
+        const cv::Mat& transformation_matrix,
+        const cv::Point2i& point
+    );
+
+    /**
      * Transform point in warped perspective to point in original perspective.
      * 
-     * @param M: transformation matrix
-     * @param point: warped to be transformed
+     * @param transformation_matrix: M
+     * @param point: warped point to be transformed
      * 
      * @return "unwarped" point
     */
     cv::Point2i unwarpPoint(
-        const cv::Mat& M,
+        const cv::Mat& transformation_matrix,
         const cv::Point2i& point
+    );
+
+    /**
+     * Get pixels per meter via given image and pointcloud.
+     * 
+     * @param img: source image to determine ppm for
+     * @param pointcloud: underlying pointcloud mapping image pixels to coordinates
+     * @param vanishing_point: calculated vanishing point of source image
+    */
+    double getPpmFromImage(
+        const cv::Mat& img,
+        const cv::Mat& pointcloud,
+        const cv::Point2d& vanishing_point
     );
 }

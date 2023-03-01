@@ -86,7 +86,7 @@ def generate_launch_description():
                     flux,
                     "--loop",
                     "--topics"
-                    ] + flux_topics,
+                    ] + flux_topics, # + ["/tf", "/tf_static"],
 
                 output="screen",
                 emulate_tty=True,
@@ -140,7 +140,7 @@ def generate_launch_description():
             executable="test_pkg",
             parameters=[param_path],
 
-            prefix=["gnome-terminal --wait -- gdb --args"],
+            prefix=["gnome-terminal --wait -- gdb -q --args"],
             output="screen",
             emulate_tty=True,
             shell=True

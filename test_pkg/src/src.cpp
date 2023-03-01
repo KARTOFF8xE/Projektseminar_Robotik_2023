@@ -127,7 +127,15 @@ void src::drawVanishingLines(cv::InputOutputArray img, const cv::Point2i& vanish
 }
 
 void src::transformToTopDown(cv::InputArray src, cv::OutputArray dst, cv::InputArray M, const cv::Size& dst_size) {
-    cv::warpPerspective(src, dst, M, dst_size, cv::INTER_NEAREST);
+    cv::warpPerspective(src, dst, M, dst_size, cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255, 0));
+}
+
+cv::Point2i src::warpPoint(const cv::Mat& transformation_matrix, const cv::Point2i& point) {
+    cv::Vec3d normal_point{static_cast<double>(point.x), static_cast<double>(point.y), 1.0};
+    cv::Mat warped_point = transformation_matrix * normal_point;
+
+    double denominator = warped_point.at<double>(2, 0);
+    return cv::Point2i(warped_point.at<double>(0, 0) / denominator, warped_point.at<double>(1, 0) / denominator);
 }
 
 cv::Point2i src::unwarpPoint(const cv::Mat& transformation_matrix, const cv::Point2i& point) {
@@ -136,4 +144,18 @@ cv::Point2i src::unwarpPoint(const cv::Mat& transformation_matrix, const cv::Poi
 
     double denominator = normal_point.at<double>(2, 0);
     return cv::Point2i(normal_point.at<double>(0, 0) / denominator, normal_point.at<double>(1, 0) / denominator);
+}
+
+double src::getPpmFromImage(const cv::Mat& img, const cv::Mat& pointcloud, const cv::Point2d& vanishing_point) {
+    const cv::Point2i pt1(vanishing_point.x, img.rows),
+                      pt2(vanishing_point.x, (vanishing_point.y + 2.0 * img.rows) / 3.0); //y + 2.0 * (h - y) / 3.0);
+
+    cv::Vec3f pt1_3d = pointcloud.at<cv::Vec3f>(pt1),
+              pt2_3d = pointcloud.at<cv::Vec3f>(pt2);
+
+    //TODO: Evtl. z bzw. Höhe ignorieren?
+    double distance_meters = cv::norm(pt1_3d - pt2_3d);
+    double distance_pixels = std::abs(pt1.y  - pt2.y);
+
+    return distance_pixels / distance_meters;
 }

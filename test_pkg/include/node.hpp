@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/time.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
@@ -22,10 +23,14 @@ class Node: public rclcpp::Node {
         void callback_pointcloud(const sensor_msgs::msg::PointCloud2::SharedPtr msg, rclcpp::Logger& logger);
         void callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclcpp::Logger& logger);
 
+        static void callback_mouse_image(int event, int x, int y, int flags, void *userdata);
+        static void callback_mouse_warped_image(int event, int x, int y, int flags, void *userdata);
+
         struct custom_parameters_t {
             std::string camera_info_topic;
             std::string imu_topic;
             std::string pointcloud_topic;
+            std::string odometry_topic;
             std::string rgb_image_topic;
         } custom_parameters;
 
@@ -37,6 +42,21 @@ class Node: public rclcpp::Node {
 
         //misc
         cv::Mat point_cloud,
-                K;
+                warped,
+                image;
+        std::array<double, 9ul> K;
         std::optional<cv::Vec3d> euler_angles = std::nullopt;
+
+        //debug
+        bool continue_updating = true;
+        bool A_is_set = true,
+             B_is_set = true;
+        //[666, 450]      [580, 710]      [638, 12]       [625, 715]
+        cv::Point2i A = cv::Point2i(666, 450),
+                    B = cv::Point2i(580, 710),
+                    A_warped = cv::Point2i(638, 12),
+                    B_warped = cv::Point2i(625, 715);
+        const int radius = 3;
+        const double scaling = .6;
+        cv::Mat transformation_matrix;
 };
