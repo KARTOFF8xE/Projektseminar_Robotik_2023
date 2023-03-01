@@ -9,10 +9,10 @@ wayfinding:
         # rgb_image:    "/zed2i_c1/zed_node_c1/rgb/image_rect_color"
       # dmc:
       # pub: "/path_width"
-    # params:
+    params:
       # angle_filter:         75.0
       # optimal_line_angle:   90.0
-      # rel_scan_line_height: 0.33
+      rel_scan_line_height: 0.4
       # filter:
       #   distance_thr:       0.2
       #   quantity_check:     14

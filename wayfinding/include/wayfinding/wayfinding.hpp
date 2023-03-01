@@ -259,5 +259,15 @@ namespace wayfinding {
             const cv::Mat& M,
             const cv::Point2i& point
         );
+
+        /**
+         * Get 3D point from pointcloud.
+         * 
+         * @param pointcloud: 4 channel, 2 dimensional pointcloud (x, y, z, rgb)
+         * @param point: point in the 2 dimensions of the pointcloud
+         * 
+         * @return x, y, z vector
+        */
+        cv::Vec3f fetchPointFromPointcloud(const cv::Mat& pointcloud, const cv::Point2i& point);
     }
 }

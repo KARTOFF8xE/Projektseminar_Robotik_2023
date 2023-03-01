@@ -69,7 +69,7 @@ class Node: public rclcpp::Node {
 
         //misc
         std::array<double, 9ul> K;                              //intrinsic camera  calibration matrix as array
-        cv::Mat point_cloud;                                    //point cloud for retrieval of real world coordinates
+        cv::Mat pointcloud;                                     //point cloud for retrieval of real world coordinates
         std::optional<cv::Vec3d> euler_angles = std::nullopt;   //pitch, yaw, roll
         std::vector<filters::limit> limits_buffer;              //filtering buffer for detected limits
         size_t high_deviations_min_buffer_size,
@@ -79,6 +79,10 @@ class Node: public rclcpp::Node {
         //visualization
         bool do_visualize;
         bool is_run_in_debugger;
+        const cv::Scalar blue   = cv::Scalar(255, 0, 0),
+                         green  = cv::Scalar(0, 255, 0),
+                         red    = cv::Scalar(0, 0, 255);
+                         
 
         #ifdef DEBUG
         //metric testing

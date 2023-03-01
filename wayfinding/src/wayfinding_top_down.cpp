@@ -112,13 +112,13 @@ bool wayfinding::top_down::getTransformation(cv::Mat& M, const cv::Size& image_s
 }
 
 void wayfinding::top_down::drawVanishingLines(cv::InputOutputArray img, const cv::Point2i& vanishing_point, const std::vector<cv::Point2i>& trapeze) {
-    const cv::Scalar red(0, 0, 255),
+    const cv::Scalar blue(255, 0, 0),
                      green(0, 255, 0);
     cv::Point2i top_left = trapeze[0],    top_right = trapeze[1],
                 bottom_left = trapeze[2], bottom_right = trapeze[3];
 
-    cv::line(img, bottom_left,  vanishing_point, red, 3);
-    cv::line(img, bottom_right, vanishing_point, red, 3);
+    cv::line(img, bottom_left,  vanishing_point, blue, 3);
+    cv::line(img, bottom_right, vanishing_point, blue, 3);
 
     cv::line(img, bottom_left,  bottom_right,   green, 3);
     cv::line(img, bottom_left,  top_left,       green, 3);
@@ -136,4 +136,11 @@ cv::Point2i wayfinding::top_down::unwarpPoint(const cv::Mat& transformation_matr
 
     double denominator = normal_point.at<double>(2, 0);
     return cv::Point2i(normal_point.at<double>(0, 0) / denominator, normal_point.at<double>(1, 0) / denominator);
+}
+
+cv::Vec3f wayfinding::top_down::fetchPointFromPointcloud(const cv::Mat& pointcloud, const cv::Point2i& point) {
+    //for some godforsaken reason getting a Vec3f directly results in different values that seem to be influenced by the rgb data
+    cv::Vec4f full_data = pointcloud.at<cv::Vec4f>(point);
+
+    return cv::Vec3f(full_data[0], full_data[1], full_data[2]);
 }
