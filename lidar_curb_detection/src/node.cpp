@@ -73,7 +73,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     /*** Filter for to high deviations ***/
     if (limits_vec.size() > 2 * custom_parameters.quantity_check_for_runaways + 1) {
         size_t i = limits_vec.size() - (custom_parameters.quantity_check_for_runaways + 1);
-        limits_vec[i] = filters::get_avg_dist(limits_vec, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr_for_avg, custom_parameters.avg_dist_thr, i);
+        limits_vec[i] = filters::noise_filter(limits_vec, custom_parameters.quantity_check_for_runaways, custom_parameters.counter_thr_for_avg, custom_parameters.avg_dist_thr, i);
         // limit.avg_dist_left = limits_vec[i].avg_dist_left;
         // limit.avg_dist_right = limits_vec[i].avg_dist_right;
     }

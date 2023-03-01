@@ -36,7 +36,7 @@ filters::limit filters::filter_for_runaways(std::vector<filters::limit> limits_v
     return limit_at_i;
 }
 
-filters::limit filters::get_avg_dist(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, double avg_dist_thr, const size_t i) {
+filters::limit filters::noise_filter(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, double avg_dist_thr, const size_t i) {
     /**
      * Define useful Variables
     */

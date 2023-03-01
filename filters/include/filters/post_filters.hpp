@@ -49,7 +49,7 @@ namespace filters {
      * 
      * @return the limit pair at i with corresponding distance_average (if existing, otherwise -1)
     */
-    filters::limit get_avg_dist(
+    filters::limit noise_filter(
         std::vector<filters::limit> limits_vec,
         size_t quantity_check,
         size_t counter_thr,
