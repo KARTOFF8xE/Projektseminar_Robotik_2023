@@ -14,16 +14,14 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<std::string>("topics.pub",                      "/lidar_path_width");
     this->declare_parameter<double> ("robot_specific.wheel_inside",         .2854);             // Distance of the vertical Plane in the center of the Robot to the verical inside Plane of the Wheels
     this->declare_parameter<double> ("robot_specific.wheel_width",          .1143);             // Width of the Wheels
-    this->declare_parameter<double> ("robot_specific.mounting_angle",       M_PI / 6.0);        // 30° //TODO als mounting_angle kommt immer 0 raus :(, Georg traurig
-    this->declare_parameter<double> ("filter.distance_thr",                 .2);                // Filter: Threshold that tells the filter, how far another Point is allowed to be away to be valid
-    this->declare_parameter<int>    ("filter.quantity_check",               14);                // Filter: Amount of Limits that is checked in each direction (before and behind)
-    this->declare_parameter<int>    ("filter.quantity_thr",                 15);                // Filter: Minimum amount of valid Points that needs to lay inside the distance_thr
+    this->declare_parameter<double> ("robot_specific.mounting_angle",       M_PI / 6.0);        // Default Tilt of the LiDAR
+    this->declare_parameter<double> ("bubble.distance_thr",                 .2);                // Bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    this->declare_parameter<int>    ("bubble.quantity_check",               14);                // Bubble: Amount of Limits that is checked in each direction (before and behind)
+    this->declare_parameter<int>    ("bubble.quantity_thr",                 15);                // Bubble: Minimum amount of valid Points that needs to lay inside the distance_thr
     this->declare_parameter<int>    ("detection_thr.angle_thr",             4);                 // Minimum angle between two Vectors that is needed to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.height_diff",           .05);               // Height_Difference that must exist, to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.advanced_ray_check_thr",.2);                // Distance a possible Curbstone should be proofed, that it isn't a Pothole
     this->declare_parameter<int>    ("detection_thr.max_check_length",      50);                // Quantity of Rays that should be checked for a Curbstone
-    this->declare_parameter<int>    ("smoothing.quantity_thr",              1);                 // Smoother: The amount of Points (in each direction) that is taken to calculate the average of a new Point
-    this->declare_parameter<int>    ("smoothing.repetitions",               0);                 // Smoother: How often the Height_line should be smoothed
     this->declare_parameter<int>    ("avg_dist.quantity_check",             15);                // avg_dist: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("avg_dist.counter_thr",                12);                // avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
     this->declare_parameter<double> ("avg_dist.avg_dist_thr",               .1);                // avg_dist: distance-averages below this Threshold are validating the Limit
@@ -36,15 +34,13 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->get_parameter("robot_specific.wheel_inside",          custom_parameters.wheel_inside);
     this->get_parameter("robot_specific.wheel_width",           custom_parameters.wheel_width);
     this->get_parameter("robot_specific.mounting_angle",        custom_parameters.mounting_angle);
-    this->get_parameter("filter.distance_thr",                  custom_parameters.distance_thr);
-    this->get_parameter("filter.quantity_check",                custom_parameters.quantity_check_for_runaways);
-    this->get_parameter("filter.quantity_thr",                  custom_parameters.quantity_thr);
+    this->get_parameter("bubble.distance_thr",                  custom_parameters.distance_thr);
+    this->get_parameter("bubble.quantity_check",                custom_parameters.quantity_check_for_runaways);
+    this->get_parameter("bubble.quantity_thr",                  custom_parameters.quantity_thr);
     this->get_parameter("detection_thr.angle_thr",              custom_parameters.angle_thr);
     this->get_parameter("detection_thr.height_diff",            custom_parameters.height_diff);
     this->get_parameter("detection_thr.advanced_ray_check_thr", custom_parameters.advanced_ray_check_thr);
     this->get_parameter("detection_thr.max_check_length",       custom_parameters.max_check_length);
-    this->get_parameter("smoothing.quantity_thr",               custom_parameters.quantity_thr_for_smoother);
-    this->get_parameter("smoothing.repetitions",                custom_parameters.repetitions);
     this->get_parameter("avg_dist.quantity_check",              custom_parameters.quantity_check_for_avg_dist);
     this->get_parameter("avg_dist.counter_thr",                 custom_parameters.counter_thr_for_avg);
     this->get_parameter("avg_dist.avg_dist_thr",                custom_parameters.avg_dist_thr);
