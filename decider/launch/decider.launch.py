@@ -32,6 +32,7 @@ def generate_launch_description():
             ],
             arguments=["--ros-args", "--log-level", log_level],
 
+            #prefix=["gnome-terminal --wait -- gdb -q -ex run --args"],
             output="screen",
             emulate_tty=True,
             shell=True

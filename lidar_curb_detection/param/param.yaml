@@ -4,11 +4,11 @@ lidar_curb_detection:
     # topics:
     #   flux:
     #   dmc:
-    #     laserscan:  
-    #   pub:
+    #     laserscan:                  # For Receiving the Pointcloud of the LiDAR
+    #   pub:                          # Topic for Publishing the solutions
     # robot_specific:
     #   wheel_inside:                 # Width of the Wheels   
-    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
+    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels
     #   mounting_angle:   30          # The Mounting-Angle of the LiDAR
     # detection_thr:
     #   angle_thr:                    # detection: Minimum angle between two Vectors that is needed to detect a Curbstone 
