@@ -8,8 +8,8 @@ lidar_curb_detection:
     #   pub:                          # Topic for Publishing the solutions
     # robot_specific:
     #   wheel_inside:                 # Width of the Wheels   
-    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels   
-    #   mounting_angle:               # The Mounting-Angle of the LiDAR
+    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels
+    #   mounting_angle:   30          # The Mounting-Angle of the LiDAR
     # detection_thr:
     #   angle_thr:                    # detection: Minimum angle between two Vectors that is needed to detect a Curbstone 
     #   height_diff:                  # detection: Height_Difference that must exist, to detect a Curbstone
