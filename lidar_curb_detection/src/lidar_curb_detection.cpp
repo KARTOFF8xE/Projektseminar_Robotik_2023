@@ -44,32 +44,6 @@ std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::get_height_line(std:
     return normed_ranges;
 }
 
-std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::smooth_height_line(std::vector<lidar_curb_det::lidar_measures> height_line, u_int quantity_threshold, u_int repetitions) {
-    std::vector<lidar_curb_det::lidar_measures> smoothed_height_line = height_line, tmp_height_line;
-
-    /**
-     * Calculating the average of {quantity_threshold * 2 + 1} Values (symmetrically)
-     * Doing it for {repetitions} time
-    */
-    for (size_t i = 0; i < repetitions; i++) {
-        tmp_height_line.clear();
-        tmp_height_line = smoothed_height_line;
-        smoothed_height_line.clear();
-        for (size_t j = quantity_threshold; j < (tmp_height_line.size() - quantity_threshold); j++) {
-            double height_of_j = 0;
-            for (size_t k = (j - quantity_threshold); k <= (j + quantity_threshold); k++) {
-                height_of_j += tmp_height_line[k].height;
-            }
-            smoothed_height_line.push_back(lidar_curb_det::lidar_measures{
-                tmp_height_line[j].distance,
-                height_of_j / (2 * quantity_threshold + 1)
-            });
-        }
-    }
-
-    return smoothed_height_line;
-}
-
 std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::sort_height_line(std::vector<lidar_curb_det::lidar_measures> height_line) {
     bool sorted = false;
     

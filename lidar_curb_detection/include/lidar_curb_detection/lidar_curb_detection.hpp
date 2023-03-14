@@ -37,21 +37,6 @@ namespace lidar_curb_det {
     );
 
     /**
-     * Smoothing the Height-Line (by average)
-     * 
-     * @param height_line: the in "get_height_line" transformed height line
-     * @param smoothing_threshold: the quantity of values (per side [taken to the left; taken to the right]) that's used to calculate one point
-     * @param repetitions: how often the given height_line should get smoothed
-     * 
-     * @returns smoothed height line
-    */
-    std::vector<lidar_curb_det::lidar_measures> smooth_height_line(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
-        u_int smoothing_threshold,
-        u_int repetitions
-    );
-
-    /**
      * Sort the height_line by distance
      *
      * @param height_line: the in "get_height_line" transformed height line
