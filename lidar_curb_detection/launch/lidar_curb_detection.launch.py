@@ -21,7 +21,7 @@ def generate_launch_description():
                 "visualize",
                 default_value='False',
                 choices=["True", "False"],
-                description="Visualize 2D-Pointcloud and Limits"
+                description="Visualize 2D-Pointcloud and Limits."
             ),
             DeclareLaunchArgument(
                 "log_level",
