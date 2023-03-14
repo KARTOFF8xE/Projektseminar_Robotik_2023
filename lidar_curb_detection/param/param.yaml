@@ -16,9 +16,9 @@ lidar_curb_detection:
     #   advanced_ray_check_thr:       # detection: Distance a possible Curbstone should be proofed, that it isn't a Pothole           
     #   max_check_length:             # detection: Quantity of Rays that should be checked for a Curbstone    
     # bubble:
-    #   distance_thr:                 # Filter: Threshold that tells the filter, how far another Point is allowed to be away to be valid
-    #   quantity_check:               # Filter: Amount of Limits that is checked in each direction (before and behind)
-    #   quantity_thr:                 # Filter: Minimum amount of valid Points that needs to lay inside the distance_thr
+    #   distance_thr:                 # bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    #   quantity_check:               # bubble: Amount of Limits that is checked in each direction (before and behind)
+    #   quantity_thr:                 # bubble: Minimum amount of valid Points that needs to lay inside the distance_thr
     # avg_dist:
     #   quantity_check:               # avg_dist: Amount of Limits that is checked in each direction (before and behind)
     #   counter_thr:                  # avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
