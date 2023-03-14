@@ -8,8 +8,8 @@ using std::placeholders::_1;
 using namespace std::chrono_literals;
 
 Node::Node(): rclcpp::Node("decider") {
-    this->declare_parameter<std::string>("sub_topic_lf",         "/lidar_path_width");  // lf stands for "low frequency"
-    this->declare_parameter<std::string>("sub_topic_hf",         "/camera_path_width"); // hf stands for "high frequency"
+    this->declare_parameter<std::string>("sub_topic_hf",        "/lidar_path_width");  // hf stands for "high frequency"
+    this->declare_parameter<std::string>("sub_topic_lf",        "/camera_path_width"); // lf stands for "low frequency"
     this->declare_parameter<std::string>("publish_topic",       "/path_width");
 
     this->get_parameter("sub_topic_lf",                         custom_parameters.sub_topic_lf);
