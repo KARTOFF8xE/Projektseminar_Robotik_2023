@@ -22,16 +22,16 @@ namespace decider {
     };
 
     /**
-     * Try's to Combine several Limit-Values from the given Vectors
+     * Trys to combine several limit values from the given vectors.
      * 
-     * @param limit_1:  The limit for which we try to find a Partner
-     * @param limits_2: The Buffer with Limits of possible Partners
+     * @param limit_hf:  The limit for which we try to find a Partner
+     * @param limits_lf: The Buffer with Limits of possible Partners
      * 
      * @return The Result-Limit of up to two Limits
     */
     decider::limit get_limits(
-        decider::limit limit_1,
-        std::vector<decider::limit> limits_2
+        decider::limit limit_hf,
+        std::vector<decider::limit> limits_lf
     );
 
 }

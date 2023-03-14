@@ -35,8 +35,6 @@ void Node::callback_lf(const custom_msgs::msg::Distance::SharedPtr msg) {
         msg->left,
         msg->header.stamp
     });
-
-    return;
 }
 
 void Node::callback_hf(const custom_msgs::msg::Distance::SharedPtr msg) {
@@ -56,19 +54,18 @@ void Node::callback_hf(const custom_msgs::msg::Distance::SharedPtr msg) {
             msg->header.stamp
         });
     }
-
-    return;
 }
 
 void Node::timer_callback() {
     decider::limit left_limit;
     decider::limit right_limit;
-    if ((val_buf_sub_top_lf_left.size() > 3) && (val_buf_sub_top_hf_left.size() > 10) &&
-        (val_buf_sub_top_lf_right.size()) > 3 && (val_buf_sub_top_hf_right.size() > 10)) {
+    if ((val_buf_sub_top_lf_left.size() > 3) && (val_buf_sub_top_lf_right.size() > 3) &&
+        (val_buf_sub_top_hf_left.size() > 500) && (val_buf_sub_top_hf_right.size() > 500)) {
+
         left_limit = decider::get_limits(val_buf_sub_top_lf_left[0], val_buf_sub_top_hf_left);
-            val_buf_sub_top_hf_left.erase(val_buf_sub_top_lf_left.begin());
+        val_buf_sub_top_lf_left.erase(val_buf_sub_top_lf_left.begin());
         right_limit = decider::get_limits(val_buf_sub_top_lf_right[0], val_buf_sub_top_hf_right);
-            val_buf_sub_top_hf_right.erase(val_buf_sub_top_lf_right.begin());
+        val_buf_sub_top_lf_right.erase(val_buf_sub_top_lf_right.begin());
         
         auto pub_msg = custom_msgs::msg::Distance();
         pub_msg.header.stamp = left_limit.timestamp;
