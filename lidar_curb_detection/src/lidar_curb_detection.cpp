@@ -7,10 +7,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <iostream>
 
 std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::get_height_line(std::vector<float> ranges, double angle_increment, double min_range, double max_range, double min_angle, double max_angle, double mounting_angle) {    
     std::vector<lidar_curb_det::lidar_measures> normed_ranges;
-    int i = 0;  // i ist Index Messungsnummer
+    int i = 0;  // i is number of measurement
     int j = 1;
 
     /**
@@ -29,7 +30,7 @@ std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::get_height_line(std:
         double range = ranges[i];
         if (range > min_range && range < max_range) {
             normed_ranges.push_back(lidar_curb_det::lidar_measures{
-                range * std::sin(mounting_angle) * std::sin(M_PI_2 - (j * angle_increment)),
+                range * std::sin(M_PI_2 - (j * angle_increment)),
                 range * std::sin(mounting_angle) * std::cos(M_PI_2 - (j * angle_increment))
             });
         }
@@ -136,9 +137,9 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
          * If a given angle_threshold is reached:
          *      The possible Curbstone will be checked for further Curbstone-characteristics (to exclude Potholes)
          */
-        double drive_line = height_line[j].height;    // TODO: Lösung einfallen lassen: die drive_line ist hier nicht mehr wirklich die drive_line, allgemeine umbenennung? Auch in anderen Funktionen?
+        double drive_line = height_line[j].height;
         if (std::abs(angle) > angle_threshold) {
-            if (curb_still_valid(height_diff, height_line, drive_line, j - 2, advanced_ray_check_thr, -1)) {
+            if (curb_still_valid(height_diff, height_line, drive_line, j - 2, advanced_ray_check_thr, - 1)) {
                 left_limit = std::abs(height_line[j - 1].distance);
                 break;
             }
@@ -146,7 +147,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
     }
     
     /**
-     * Same Method from the left side for the right side
+     * Same Method for the right side
     */
     while (height_line[i].distance < wheel_inside && i < height_line.size()) {
         i++;
@@ -193,12 +194,12 @@ void lidar_curb_det::visualize_cross_section(std::vector<lidar_curb_det::lidar_m
     /**
      * Creating a Window and adding all points of the height_line to a cv::Point2d-Vector
     */
-    cv::Mat image(250, 1000, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat image(250, 2000, CV_8UC3, cv::Scalar(0, 0, 0));
     int thickness = 2;
     std::vector<cv::Point2d> points;
     for (size_t i = 0; i < height_line.size(); i++) {
         points.push_back(cv::Point2d{
-            ((height_line[i].distance + 5) * 100),
+            ((height_line[i].distance + 10) * 100),
             height_line[i].height * 200});
     }
 
@@ -216,20 +217,20 @@ void lidar_curb_det::visualize_cross_section(std::vector<lidar_curb_det::lidar_m
     */
     if (left_limit >  0) {
         left_limit = -left_limit;
-        cv::Point2d left_bottom((left_limit + 5) * 100, 0), left_top((left_limit+5) * 100, 250);
-        line(image, left_bottom, left_top, cv::Scalar(0, 255, 0), thickness);   // grün ist Links
+        cv::Point2d left_bottom((left_limit + 10) * 100, 0), left_top((left_limit + 10) * 100, 250);
+        line(image, left_bottom, left_top, cv::Scalar(0, 255, 0), thickness);   // green -> left
     }
     if (right_limit > 0) {
-        cv::Point2d right_bottom((right_limit + 5) * 100, 0), right_top((right_limit + 5) * 100, 250);
-        line(image, right_bottom, right_top, cv::Scalar(0, 0, 255), thickness); // rot ist Rechts
+        cv::Point2d right_bottom((right_limit + 10) * 100, 0), right_top((right_limit + 10) * 100, 250);
+        line(image, right_bottom, right_top, cv::Scalar(0, 0, 255), thickness); // red -> right
     }
 
 
     /**
      * For better (more advanced) visualization the Edges of the Wheels are drawn in Yellow
     */
-    cv::Point2d left_wheel_top_left((-(wheel_width + wheel_inside) +5) * 100, 0), left_wheel_top_right(((-wheel_inside) + 5) * 100, 0), left_wheel_bottom_left((-(wheel_width + wheel_inside) + 5) * 100, 255), left_wheel_bottom_right((-wheel_inside + 5) * 100, 255); 
-    cv::Point2d right_wheel_top_left(((wheel_inside) + 5) * 100, 0), right_wheel_top_right(((wheel_width + wheel_inside) + 5) * 100, 0), right_wheel_bottom_left((wheel_inside + 5) * 100, 255), right_wheel_bottom_right(((wheel_width + wheel_inside) + 5) * 100, 255); 
+    cv::Point2d left_wheel_top_left((-(wheel_width + wheel_inside) + 10) * 100, 0), left_wheel_top_right(((-wheel_inside) + 10) * 100, 0), left_wheel_bottom_left((-(wheel_width + wheel_inside) + 10) * 100, 255), left_wheel_bottom_right((-wheel_inside + 10) * 100, 255); 
+    cv::Point2d right_wheel_top_left(((wheel_inside) + 10) * 100, 0), right_wheel_top_right(((wheel_width + wheel_inside) + 10) * 100, 0), right_wheel_bottom_left((wheel_inside + 10) * 100, 255), right_wheel_bottom_right(((wheel_width + wheel_inside) + 10) * 100, 255); 
 
     thickness = 1;
     line(image, left_wheel_top_left, left_wheel_bottom_left, cv::Scalar(0, 255, 255), thickness);
@@ -246,62 +247,3 @@ void lidar_curb_det::visualize_cross_section(std::vector<lidar_curb_det::lidar_m
     }
     return;
 }
-
-// void lidar_curb_det::visualize_street_view(std::vector<filters::limit> limits_vec, double wheel_inside, double wheel_width) {
-//     /**
-//      * The left Limit of the Curbstone is drawn in green
-//      * The right Limit of the Curbstone is drawn in red
-//      * The Edges of the wheels are drawn in yellow
-//      * 
-//      * For useful Visualization, the coordinate-System is getting Scaled, so that anything can be seen ("+ 5", that anything will be in the Window; "* 100", that anything is scaled useful)
-//     */
-
-//     /**
-//      * Creating a Window
-//      * If a left Limit is Valid, it will be Drawn with a green Point
-//      * Analog procedure for the Right Limit, just with red Points
-//      * The latest up to 1000 Limits will be printed (if Valid)
-//      * This will give a view of the Street from the Bird-Perspective
-//     */
-//     size_t i = 0;
-//     cv::Mat img(1000, 1000, CV_8UC3, cv::Scalar(0, 0, 0));
-//     while (i < 1000 && i < limits_vec.size()) {
-//         if (limits_vec[limits_vec.size() - i].left > 0) {
-//             cv::Point2d left((-(limits_vec[limits_vec.size() - i].left) + 5) * 100, i);
-//             cv::circle(img, left, 1, cv::Scalar(0, 255, 0));
-//         } else if (limits_vec[limits_vec.size() - i].left < 0) {
-//             cv::Point2d left((-(std::abs(limits_vec[limits_vec.size() - i].left)) + 5) * 100, i);
-//             cv::circle(img, left, 1, cv::Scalar(150, 150, 0));
-//         }
-//         if (limits_vec[limits_vec.size() - i].right > 0) {
-//             cv::Point2d right(((limits_vec[limits_vec.size() - i].right) + 5) * 100, i);
-//             cv::circle(img, right, 1, cv::Scalar(0, 0, 255));
-//         } else if (limits_vec[limits_vec.size() - i].right < 0) {
-//             cv::Point2d right(((std::abs(limits_vec[limits_vec.size() - i].right)) + 5) * 100, i);
-//             cv::circle(img, right, 1, cv::Scalar(150, 150, 0));
-//         }
-//         i++;
-//     }
-
-//     /**
-//      * For better (more advanced) visualization the Edges of the Wheels are drawn in Yellow
-//     */
-//     cv::Point2d left_wheel_top_left((-(wheel_width + wheel_inside) + 5) * 100, 0), left_wheel_top_right(((-wheel_inside) + 5) * 100, 0), left_wheel_bottom_left((-(wheel_width + wheel_inside) + 5) * 100, 1000), left_wheel_bottom_right((-wheel_inside + 5) * 100, 1000);
-//     cv::Point2d right_wheel_top_left(((wheel_inside) + 5) * 100, 0), right_wheel_top_right(((wheel_width + wheel_inside) + 5) * 100, 0), right_wheel_bottom_left((wheel_inside + 5) * 100, 1000), right_wheel_bottom_right(((wheel_width + wheel_inside) + 5) * 100, 1000);
-
-//     int thickness = 1;
-//     line(img, left_wheel_top_left, left_wheel_bottom_left, cv::Scalar(0, 255, 255), thickness);
-//     line(img, left_wheel_top_right, left_wheel_bottom_right, cv::Scalar(0, 255, 255), thickness);
-//     line(img, right_wheel_top_left, right_wheel_bottom_left, cv::Scalar(0, 255, 255), thickness);
-//     line(img, right_wheel_top_right, right_wheel_bottom_right, cv::Scalar(0, 255, 255), thickness);
-
-//     /**
-//      * Show the Window and close the entire launch, if "Esc" is pressed
-//     */
-//     imshow("Streetview", img);
-// 	if (cv::waitKey(10) == 27) { //exit on ESC
-//         exit(0);
-//     }
-
-//     return;
-// }
