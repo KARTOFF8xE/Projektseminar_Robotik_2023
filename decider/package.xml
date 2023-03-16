@@ -10,6 +10,7 @@
   <license>WTFPL</license>
   
   <depend>custom_msgs</depend>
+  <depend>filters</depend>
   <depend>rclcpp</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

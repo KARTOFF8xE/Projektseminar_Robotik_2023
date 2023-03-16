@@ -1,37 +1,42 @@
 #pragma once
 
 #include <vector>
-#include <tuple>
-#include <rclcpp/time.hpp>
+#include <utility>
+#include <optional>
+
+#include "rclcpp/time.hpp"
+#include "rclcpp/logger.hpp"
+
+#include "filters/post_filters.hpp"
+
+
+std::ostream &operator<<(std::ostream& stream, const rclcpp::Time& rvalue);
+
+namespace filters {
+    bool operator<(const limit& lvalue, const limit& rvalue);
+    bool operator>(const limit& lvalue, const limit& rvalue);
+}
 
 namespace decider {
-    struct limit {
-        // left limit
-        double limit = 0;
-        // time of the measurement
-        rclcpp::Time timestamp;
-    };
-
-    struct limits {
-        // left limit
-        double right_limit;
-        // right limit
-        double left_limit;
-        // time of the measurement
-        rclcpp::Time timestamp;
-    };
-
-    /**
-     * Trys to combine several limit values from the given vectors.
-     * 
-     * @param limit_hf:  The limit for which we try to find a Partner
-     * @param limits_lf: The Buffer with Limits of possible Partners
-     * 
-     * @return The Result-Limit of up to two Limits
-    */
-    decider::limit get_limits(
-        decider::limit limit_hf,
-        std::vector<decider::limit> limits_lf
+    rclcpp::Time getMostRecentLimitTimestamp(
+        const std::vector<filters::limit>& camera_buffer,
+        const std::vector<filters::limit>& lidar_buffer
     );
 
+    std::vector<filters::limit> removeTooOldLimits(
+        const std::vector<filters::limit>& buffer,
+        rclcpp::Time most_recent_timestamp,
+        double disgard_time_thr
+    );
+
+    std::optional<std::pair<filters::limit, filters::limit>> getTimedPair(
+        std::vector<filters::limit>& camera_buffer,
+        std::vector<filters::limit>& lidar_buffer,
+        double time_difference_thr,
+        rclcpp::Logger logger
+    );
+
+    filters::limit mergeTimedPair(
+        const std::pair<filters::limit, filters::limit>& pair
+    );
 }
