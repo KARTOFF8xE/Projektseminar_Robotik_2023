@@ -105,4 +105,4 @@ Options:
 
 #### `sublaunch.lidar_curb_detection.launch.py`
 
-This launch file is thought for the Deciders [start_all.launch.py](../decider/README.md)
+This launch file is thought for the Deciders [start_all.launch.py](../decider/README.md#start_alllaunchpy)
