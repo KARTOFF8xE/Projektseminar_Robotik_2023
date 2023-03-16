@@ -7,6 +7,8 @@
 
 #include "decider.hpp"
 
+#define OUTPUT_BUFFER_SIZE 20UL
+
 class Node: public rclcpp::Node {
     public:
         Node();
@@ -32,4 +34,6 @@ class Node: public rclcpp::Node {
     
     std::vector<filters::limit> camera_buffer, lidar_buffer;
     bool stop_buffer_write = false;
+    std::array<double, OUTPUT_BUFFER_SIZE> left_output_buffer = {0}, right_output_buffer = {0};
+    size_t output_buffer_position = 0;
 };

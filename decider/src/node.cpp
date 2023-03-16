@@ -35,17 +35,13 @@ Node::Node(): rclcpp::Node("decider") {
 void Node::callback_camera(const custom_msgs::msg::Distance::SharedPtr msg) {
     while (this->stop_buffer_write) {} //TODO: is there a bettter way to do this?
     
-    if (msg->left > 0 || msg->right > 0) {
-        this->camera_buffer.push_back(filters::limit{rclcpp::Time(msg->header.stamp), msg->left, msg->right});
-    }
+    this->camera_buffer.push_back(filters::limit{rclcpp::Time(msg->header.stamp), msg->left, msg->right});
 }
 
 void Node::callback_lidar(const custom_msgs::msg::Distance::SharedPtr msg) {
     while (this->stop_buffer_write) {} //TODO: is there a bettter way to do this?
     
-    if (msg->left > 0 || msg->right > 0) {
-        this->lidar_buffer.push_back(filters::limit{rclcpp::Time(msg->header.stamp), msg->left, msg->right});
-    }
+    this->lidar_buffer.push_back(filters::limit{rclcpp::Time(msg->header.stamp), msg->left, msg->right});
 }
 
 void Node::callback_merge_timer() {
@@ -71,14 +67,20 @@ void Node::callback_merge_timer() {
     }
     //else merge pair into one limit
     filters::limit merged_limit = decider::mergeTimedPair(pair.value());
+    this->left_output_buffer[this->output_buffer_position]  = merged_limit.left;
+    this->right_output_buffer[this->output_buffer_position] = merged_limit.right;
+    this->output_buffer_position = (this->output_buffer_position + 1) / OUTPUT_BUFFER_SIZE;
+
+    double left  = std::accumulate(this->left_output_buffer.begin(),  this->left_output_buffer.end(),  0.0) / OUTPUT_BUFFER_SIZE,
+           right = std::accumulate(this->right_output_buffer.begin(), this->right_output_buffer.end(), 0.0) / OUTPUT_BUFFER_SIZE;
 
     custom_msgs::msg::Distance msg;
     // uint64_t time_since_epoch_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     // msg.header.set__stamp(rclcpp::Time(time_since_epoch_ns, RCL_SYSTEM_TIME));
     msg.header.set__stamp(merged_limit.timestamp);
-    msg.set__left(merged_limit.left);
-    msg.set__right(merged_limit.right);
-    msg.set__width(merged_limit.left + merged_limit.right);
+    msg.set__left(left);
+    msg.set__right(right);
+    msg.set__width(left + right);
 
     this->pub->publish(msg);
 }

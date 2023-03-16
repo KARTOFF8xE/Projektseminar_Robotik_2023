@@ -68,7 +68,8 @@ filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::
     bool first_has_left     = (pair.first.left  > 0.0f),
          second_has_left    = (pair.second.left > 0.0f);
     if (first_has_left && second_has_left) {
-        output.left = (pair.first.left + pair.second.left) / 2.0f;
+        output.left = std::min(pair.first.left, pair.second.left);
+        //output.left = (pair.first.left + pair.second.left) / 2.0f;
     } else if (first_has_left) {
         output.left = pair.first.left;
     } else if (second_has_left) { //if is unnecessary here, but it makes it more clear what happens
@@ -79,7 +80,8 @@ filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::
     bool first_has_right    = (pair.first.right  > 0.0f),
          second_has_right   = (pair.second.right > 0.0f);
     if (first_has_right && second_has_right) {
-        output.right = (pair.first.right + pair.second.right) / 2.0f;
+        output.right = std::min(pair.first.right, pair.second.right);
+        //output.right = (pair.first.right + pair.second.right) / 2.0f;
     } else if (first_has_right) {
         output.right = pair.first.right;
     } else if (second_has_right) { //if is unnecessary here, but it makes it more clear what happens
