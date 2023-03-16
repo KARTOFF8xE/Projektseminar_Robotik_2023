@@ -16,16 +16,16 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<double> ("robot_specific.wheel_inside",         .2854);             // Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels
     this->declare_parameter<double> ("robot_specific.wheel_width",          .1143);             // Width of the Wheels
     this->declare_parameter<double> ("robot_specific.mounting_angle",       M_PI / 6.0);        // Default Tilt of the LiDAR
-    this->declare_parameter<double> ("bubble.distance_thr",                 .4);                // Bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
-    this->declare_parameter<int>    ("bubble.quantity_check",               14);                // Bubble: Amount of Limits that is checked in each direction (before and behind)
-    this->declare_parameter<int>    ("bubble.quantity_thr",                 15);                // Bubble: Minimum amount of valid Points that needs to lay inside the distance_thr
     this->declare_parameter<int>    ("detection_thr.angle_thr",             4);                 // Minimum angle between two Vectors that is needed to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.height_diff",           .05);               // Height_Difference that must exist, to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.advanced_ray_check_thr",.2);                // Distance a possible Curbstone should be proofed, that it isn't a Pothole
     this->declare_parameter<int>    ("detection_thr.max_check_length",      75);                // Quantity of Rays that should be checked for a Curbstone
+    this->declare_parameter<double> ("bubble.distance_thr",                 .4);                // Bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    this->declare_parameter<int>    ("bubble.quantity_check",               14);                // Bubble: Amount of Limits that is checked in each direction (before and behind)
+    this->declare_parameter<int>    ("bubble.quantity_thr",                 15);                // Bubble: Minimum amount of valid Points that needs to lay inside the distance_thr
+    this->declare_parameter<double> ("avg_dist.avg_dist_thr",               .2);                // avg_dist: distance-averages below this Threshold are validating the Limit
     this->declare_parameter<int>    ("avg_dist.quantity_check",             15);                // avg_dist: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("avg_dist.counter_thr",                12);                // avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
-    this->declare_parameter<double> ("avg_dist.avg_dist_thr",               .2);                // avg_dist: distance-averages below this Threshold are validating the Limit
     this->declare_parameter<int>    ("island.quantity_check",               45);                // island: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("island.counter_thr",                  40);                // island: Needed Quantity of Valid Limits to validate the looked up Limit
     
