@@ -50,11 +50,11 @@ void Node::callback_merge_timer() {
     this->stop_buffer_write = true;
     //to ensure std::{min|max}_element iterators will never be .end()
     if (camera_buffer.empty() || lidar_buffer.empty()) {
-        RCLCPP_INFO_STREAM(logger, "[timer callback merge] Some buffers are empty.");
+        RCLCPP_DEBUG_STREAM(logger, "[timer callback merge] Some buffers are empty.");
         this->stop_buffer_write = false;
         return;
     } else {
-        RCLCPP_INFO_STREAM(logger, "[timer callback merge] camera buffer size: " << camera_buffer.size() << " lidar buffer size: " << lidar_buffer.size());
+        RCLCPP_DEBUG_STREAM(logger, "[timer callback merge] camera buffer size: " << camera_buffer.size() << " lidar buffer size: " << lidar_buffer.size());
     }
 
     //get pair of camera/lidar values to merge
@@ -75,8 +75,6 @@ void Node::callback_merge_timer() {
            right = std::accumulate(this->right_output_buffer.begin(), this->right_output_buffer.end(), 0.0) / OUTPUT_BUFFER_SIZE;
 
     custom_msgs::msg::Distance msg;
-    // uint64_t time_since_epoch_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    // msg.header.set__stamp(rclcpp::Time(time_since_epoch_ns, RCL_SYSTEM_TIME));
     msg.header.set__stamp(merged_limit.timestamp);
     msg.set__left(left);
     msg.set__right(right);

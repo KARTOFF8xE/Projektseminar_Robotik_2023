@@ -183,7 +183,7 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
         RCLCPP_DEBUG(logger, "Attempted to get rgb image before euler angles were set.");
         return;
     }
-    RCLCPP_INFO_ONCE(logger, "[rgb image] Got first callback.");
+    RCLCPP_DEBUG_ONCE(logger, "[rgb image] Got first callback.");
 
 
     //retrieve image
@@ -264,24 +264,6 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
                 current_limit.right = limit;
             }
         }
-
-        /*
-        if (left != -1 && right != -1) {
-            cv::Point2i left_pt     = cv::Point2i(left, scan_line_height),
-                        right_pt    = cv::Point2i(right, scan_line_height);
-            double distance = cv::norm(left_point_3d - right_point_3d) / 1e38;
-            RCLCPP_INFO_STREAM(logger, "[rgb image] distance (from: " << left_pt << " to: " << right_pt << "): " << distance);
-
-            cv::Mat image_copy(image.size(), CV_8UC3);
-            image.copyTo(image_copy);
-
-            cv::line(image_copy, left_pt, right_pt, this->blue, 2);
-            cv::circle(image_copy, left_pt, 3, this->red, 2);
-            cv::circle(image_copy, right_pt, 3, this->green, 2);
-
-            cv::imwrite("frame_" + std::to_string(rclcpp::Time(msg->header.stamp).nanoseconds()) + "_" + std::to_string(distance) + ".jpg", image_copy);
-        }
-        */
     }
     limits_buffer.push_back(current_limit);
     size_t buffer_size = limits_buffer.size();

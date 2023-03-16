@@ -44,11 +44,11 @@ std::optional<std::pair<filters::limit, filters::limit>> decider::getTimedPair(s
 
     //check if match was found
     if (camera_limit_iter == camera_buffer_end) { //no match was found
-        RCLCPP_INFO_STREAM(logger, "[get timed pair] No pair found - closest: " << min_difference);
+        RCLCPP_DEBUG_STREAM(logger, "[get timed pair] No pair found - closest: " << min_difference);
 
         return std::nullopt;
     } else {
-        RCLCPP_INFO_STREAM(logger, "[get timed pair] Found camera @ " << camera_limit.timestamp << " and lidar @ " << lidar_limit.timestamp << " with difference " << difference << 's');
+        RCLCPP_DEBUG_STREAM(logger, "[get timed pair] Found camera @ " << camera_limit.timestamp << " and lidar @ " << lidar_limit.timestamp << " with difference " << difference << 's');
 
         //erase current and all older limits
         lidar_buffer.erase(lidar_buffer.begin(), lidar_limit_iter + 1);
@@ -61,7 +61,6 @@ std::optional<std::pair<filters::limit, filters::limit>> decider::getTimedPair(s
 filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::limit>& pair) {
     filters::limit output;
 
-    //TODO: is das sinnvoll?!?
     output.timestamp = rclcpp::Time((pair.first.timestamp.nanoseconds() + pair.second.timestamp.nanoseconds()) / 2.0f);
 
     //left
@@ -69,7 +68,6 @@ filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::
          second_has_left    = (pair.second.left > 0.0f);
     if (first_has_left && second_has_left) {
         output.left = std::min(pair.first.left, pair.second.left);
-        //output.left = (pair.first.left + pair.second.left) / 2.0f;
     } else if (first_has_left) {
         output.left = pair.first.left;
     } else if (second_has_left) { //if is unnecessary here, but it makes it more clear what happens
@@ -81,7 +79,6 @@ filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::
          second_has_right   = (pair.second.right > 0.0f);
     if (first_has_right && second_has_right) {
         output.right = std::min(pair.first.right, pair.second.right);
-        //output.right = (pair.first.right + pair.second.right) / 2.0f;
     } else if (first_has_right) {
         output.right = pair.first.right;
     } else if (second_has_right) { //if is unnecessary here, but it makes it more clear what happens
