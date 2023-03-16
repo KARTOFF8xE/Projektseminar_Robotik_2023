@@ -6,6 +6,7 @@
 #include "rclcpp/qos.hpp"
 
 #include <cmath>
+#include <fstream>
 
 using std::placeholders::_1;
 
@@ -15,7 +16,7 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<double> ("robot_specific.wheel_inside",         .2854);             // Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels
     this->declare_parameter<double> ("robot_specific.wheel_width",          .1143);             // Width of the Wheels
     this->declare_parameter<double> ("robot_specific.mounting_angle",       M_PI / 6.0);        // Default Tilt of the LiDAR
-    this->declare_parameter<double> ("bubble.distance_thr",                 .2);                // Bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
+    this->declare_parameter<double> ("bubble.distance_thr",                 .4);                // Bubble: Threshold that tells the filter, how far another Point is allowed to be away to be valid
     this->declare_parameter<int>    ("bubble.quantity_check",               14);                // Bubble: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("bubble.quantity_thr",                 15);                // Bubble: Minimum amount of valid Points that needs to lay inside the distance_thr
     this->declare_parameter<int>    ("detection_thr.angle_thr",             4);                 // Minimum angle between two Vectors that is needed to detect a Curbstone
@@ -24,7 +25,7 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<int>    ("detection_thr.max_check_length",      75);                // Quantity of Rays that should be checked for a Curbstone
     this->declare_parameter<int>    ("avg_dist.quantity_check",             15);                // avg_dist: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("avg_dist.counter_thr",                12);                // avg_dist: Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
-    this->declare_parameter<double> ("avg_dist.avg_dist_thr",               .1);                // avg_dist: distance-averages below this Threshold are validating the Limit
+    this->declare_parameter<double> ("avg_dist.avg_dist_thr",               .2);                // avg_dist: distance-averages below this Threshold are validating the Limit
     this->declare_parameter<int>    ("island.quantity_check",               45);                // island: Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("island.counter_thr",                  40);                // island: Needed Quantity of Valid Limits to validate the looked up Limit
     
@@ -104,10 +105,19 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
         pub_msg.header.stamp = limits_vec[i].timestamp;
         pub_msg.left = limits_vec[i].left;
         pub_msg.right = limits_vec[i].right;
+        double width = 0;
         if (limits_vec[i].left > 0 && limits_vec[i].right > 0) {
-            pub_msg.width =  limits_vec[i].left + limits_vec[i].right;
+            width = limits_vec[i].left + limits_vec[i].right;
+            pub_msg.width = width;
+
         }
         pub->publish(pub_msg);
+
+        std::ofstream f;
+        f.open("lidar_width_data.csv", std::ios::app);
+        f << ((int)limits_vec[i].timestamp.seconds() % 10000) << ", " << limits_vec[i].left << ", " << limits_vec[i].right << ", " <<  width << "\n" ;
+        f.close();
+
     } else {
         RCLCPP_DEBUG(logger, "Not enough values, i only have %d of %d", limits_vec.size(), min_quantity_of_values + 1);
     }
