@@ -14,140 +14,54 @@ std::ostream &operator<<(std::ostream& stream, const rclcpp::Time& rvalue) {
     return stream;
 }
 
-bool filters::operator<(const filters::limit& lvalue, const filters::limit& rvalue) {
-    return lvalue.timestamp.nanoseconds() < rvalue.timestamp.nanoseconds();
-}
-bool filters::operator>(const filters::limit& lvalue, const filters::limit& rvalue) {
-    return lvalue.timestamp.nanoseconds() > rvalue.timestamp.nanoseconds();
-}
+std::optional<std::pair<filters::limit, filters::limit>> decider::getTimedPair(std::vector<filters::limit>& camera_buffer, std::vector<filters::limit>& lidar_buffer, double time_difference_thr, rclcpp::Logger logger) {
+    filters::limit camera_limit, lidar_limit;
+    std::vector<filters::limit>::iterator lidar_buffer_end  = lidar_buffer.end(),
+                                          camera_buffer_end = camera_buffer.end();
 
-rclcpp::Time decider::getMostRecentLimitTimestamp(const std::vector<filters::limit>& camera_buffer, const std::vector<filters::limit>& lidar_buffer) {
-    //get the newest limits in the buffer
-    std::vector<filters::limit>::const_iterator max_camera_limit = std::max_element(camera_buffer.begin(), camera_buffer.end()),
-                                                max_lidar_limit  = std::max_element(lidar_buffer.begin(),  lidar_buffer.end());
-    // bool max_camera_limit_is_valid  = (max_camera_limit != camera_buffer.end()),
-    //      max_lidar_limit_is_valid   = (max_lidar_limit  != lidar_buffer.end());
+    //iterate from beginning to end to go from oldest to newest
+    //this assumes that all is in ascending order
+    double difference, min_difference = std::numeric_limits<double>::max();
+    std::vector<filters::limit>::iterator camera_limit_iter, lidar_limit_iter;
+    for (camera_limit_iter = camera_buffer.begin(); camera_limit_iter != camera_buffer_end; camera_limit_iter++) { //camera is outer since it probably has more values
+        for (lidar_limit_iter = lidar_buffer.begin(); lidar_limit_iter != lidar_buffer_end; lidar_limit_iter++) {
+            //get difference and log the smallest for debugging
+            difference = std::abs(camera_limit_iter->timestamp.seconds() - lidar_limit_iter->timestamp.seconds());
+            min_difference = std::min(difference, min_difference);
+            
+            //check if any lidar values are in range
+            if (difference < time_difference_thr) {
+                camera_limit = *camera_limit_iter;
+                lidar_limit = *lidar_limit_iter;
 
-    // if (max_camera_limit_is_valid && max_lidar_limit_is_valid) {
-        return max_camera_limit > max_lidar_limit ? max_camera_limit->timestamp : max_lidar_limit->timestamp;
-    // } else if (max_camera_limit_is_valid) {
-    //     return max_camera_limit->timestamp;
-    // } else { //if (max_lidar_limit_is_valid) {
-    //     return max_lidar_limit->timestamp;
-    // }
-}
-
-std::vector<filters::limit> decider::removeTooOldLimits(const std::vector<filters::limit>& buffer, rclcpp::Time most_recent_timestamp, double disgard_time_thr) {
-    std::vector<filters::limit> new_buffer;
-
-    for (filters::limit element: buffer) {
-        //only allow elements that are less then disgard_time_thr seconds in the past
-        if ((most_recent_timestamp - element.timestamp).seconds() < disgard_time_thr) {
-            element.avg_dist_left++;
-            new_buffer.push_back(element);
+                break;
+            }
+        }
+        if (lidar_limit_iter != lidar_buffer_end) {
+            break;
         }
     }
 
-    return new_buffer;
-}
+    //check if match was found
+    if (camera_limit_iter == camera_buffer_end) { //no match was found
+        RCLCPP_INFO_STREAM(logger, "[get timed pair] No pair found - closest: " << min_difference);
 
-std::optional<std::pair<filters::limit, filters::limit>> decider::getTimedPair(std::vector<filters::limit>& camera_buffer, std::vector<filters::limit>& lidar_buffer, double time_difference_thr, rclcpp::Logger logger) {
-    //TODO: make parameter
-    // uint max_unused_iterations = 25u;
-    
-    //get the oldest limits in the buffer
-    std::vector<filters::limit>::iterator min_camera_limit = std::min_element(camera_buffer.begin(), camera_buffer.end()),
-                                          min_lidar_limit  = std::min_element(lidar_buffer.begin(),  lidar_buffer.end());
+        return std::nullopt;
+    } else {
+        RCLCPP_INFO_STREAM(logger, "[get timed pair] Found camera @ " << camera_limit.timestamp << " and lidar @ " << lidar_limit.timestamp << " with difference " << difference << 's');
 
-    // bool min_camera_limit_is_valid  = (min_camera_limit != camera_buffer.end()),
-    //      min_lidar_limit_is_valid   = (min_lidar_limit  != lidar_buffer.end());
-    filters::limit reference, other_value;
-    // if (min_camera_limit_is_valid && min_lidar_limit_is_valid) {
-        if (*min_camera_limit < *min_lidar_limit) {
-            //camera is older so it is chosen as reference
-            //therefor we search in the lidar buffer for a close enough value
-            reference = *min_camera_limit;
+        //erase current and all older limits
+        lidar_buffer.erase(lidar_buffer.begin(), lidar_limit_iter + 1);
+        camera_buffer.erase(camera_buffer.begin(), camera_limit_iter + 1);
 
-            double min_time_difference = std::numeric_limits<double>::max(),
-                time_difference;
-            std::vector<filters::limit>::iterator lidar_iterator;
-            for (lidar_iterator = lidar_buffer.begin(); lidar_iterator != lidar_buffer.end(); lidar_iterator++) {
-                //get time difference
-                time_difference = reference.timestamp.seconds() - lidar_iterator->timestamp.seconds();
-
-                //records closest a value has ever come
-                min_time_difference = std::min(std::abs(time_difference), min_time_difference);
-
-                if (std::abs(time_difference) < time_difference_thr) {
-                    other_value = *lidar_iterator;
-                    break;
-                }
-            }
-
-            if (lidar_iterator == lidar_buffer.end()) { //no value was found
-                RCLCPP_INFO_STREAM(logger, "[merge] Reference (camera @ " << reference.timestamp << ") has closest diff: " << min_time_difference);
-                return std::nullopt;
-            }
-            
-            //being here means two (sufficiently) valid limits where found so they can be removed from the buffer
-            camera_buffer.erase(min_camera_limit);
-            lidar_buffer.erase(lidar_iterator);
-
-            RCLCPP_INFO_STREAM(logger, "[merge] Reference (camera @ " << reference.timestamp << ") found lidar value (" << other_value.timestamp << ") | diff: " << time_difference);
-        } else {
-            //lidar is older so it is chosen as reference
-            //therefor we search in the camera buffer for a close enough value
-            reference = *min_lidar_limit;
-
-            double min_time_difference = std::numeric_limits<double>::max(),
-                time_difference;
-            std::vector<filters::limit>::iterator camera_iterator;
-            for (camera_iterator = camera_buffer.begin(); camera_iterator != camera_buffer.end(); camera_iterator++) {
-                //get time difference
-                time_difference = reference.timestamp.seconds() - camera_iterator->timestamp.seconds();
-
-                //records closest a value has ever come
-                min_time_difference = std::min(std::abs(time_difference), min_time_difference);
-
-                if (std::abs(time_difference) < time_difference_thr) {
-                    other_value = *camera_iterator;
-                    break;
-                }
-            }
-
-            if (camera_iterator == camera_buffer.end()) { //no value was found
-                RCLCPP_INFO_STREAM(logger, "[merge] Reference (lidar @ " << reference.timestamp << ") has closest diff: " << min_time_difference);
-                return std::nullopt;
-            }
-            
-            //being here means two (sufficiently) valid limits where found so they can be removed from the buffer
-            lidar_buffer.erase(min_lidar_limit);
-            camera_buffer.erase(camera_iterator);
-
-            RCLCPP_INFO_STREAM(logger, "[merge] Reference (lidar @ " << reference.timestamp << ") found camera value (" << other_value.timestamp << ") | diff: " << time_difference);
-        }
-    // } else if (min_camera_limit_is_valid && min_camera_limit->avg_dist_left >= max_unused_iterations) {
-    //     reference = *min_camera_limit;
-    //     camera_buffer.erase(min_camera_limit);
-    //     other_value.timestamp = reference.timestamp; //since this value doesn't really exist the mean between its timestamp and the references should give the references timestamp
-
-    //     RCLCPP_INFO_STREAM(logger, "[merge] Reference (camera @ " << reference.timestamp << ") forced after " << (int)reference.avg_dist_left << " iterations");
-    // } else if (min_lidar_limit_is_valid  && min_lidar_limit->avg_dist_left  >= max_unused_iterations) {
-    //     reference = *min_lidar_limit;
-    //     lidar_buffer.erase(min_lidar_limit);
-    //     other_value.timestamp = reference.timestamp; //since this value doesn't really exist the mean between its timestamp and the references should give the references timestamp
-
-    //     RCLCPP_INFO_STREAM(logger, "[merge] Reference (lidar @ " << reference.timestamp << ") forced after " << (int)reference.avg_dist_left << " iterations");
-    // } else {
-    //     return std::nullopt;
-    // }
-
-    return std::make_pair(reference, other_value);
+        return std::make_pair(camera_limit, lidar_limit);
+    }
 }
 
 filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::limit>& pair) {
     filters::limit output;
 
+    //TODO: is das sinnvoll?!?
     output.timestamp = rclcpp::Time((pair.first.timestamp.nanoseconds() + pair.second.timestamp.nanoseconds()) / 2.0f);
 
     //left

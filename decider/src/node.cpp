@@ -61,25 +61,15 @@ void Node::callback_merge_timer() {
         RCLCPP_INFO_STREAM(logger, "[timer callback merge] camera buffer size: " << camera_buffer.size() << " lidar buffer size: " << lidar_buffer.size());
     }
 
-    rclcpp::Time most_recent_timestamp = decider::getMostRecentLimitTimestamp(this->camera_buffer, this->lidar_buffer);
-    RCLCPP_INFO_STREAM(logger, "[timer callback merge] most recent timestamp: " << most_recent_timestamp);
-    this->camera_buffer = std::move(decider::removeTooOldLimits(this->camera_buffer, most_recent_timestamp, custom_parameters.disgard_time_thr));
-    this->lidar_buffer  = std::move(decider::removeTooOldLimits(this->lidar_buffer, most_recent_timestamp, custom_parameters.disgard_time_thr));
-
-    if (camera_buffer.empty() || lidar_buffer.empty()) {
-        RCLCPP_INFO_STREAM(logger, "[timer callback merge] Some buffers are empty after cleanup.");
-        this->stop_buffer_write = false;
-        return;
-    } else {
-        RCLCPP_INFO_STREAM(logger, "[timer callback merge] camera buffer size: " << camera_buffer.size() << " lidar buffer size: " << lidar_buffer.size() << " after cleanup.");
-    }
-
+    //get pair of camera/lidar values to merge
     std::optional<std::pair<filters::limit, filters::limit>> pair = decider::getTimedPair(camera_buffer, lidar_buffer, custom_parameters.time_diff_thr, logger);
     this->stop_buffer_write = false;
 
+    //exit here if no pair was found
     if (!pair.has_value()) {
         return;
     }
+    //else merge pair into one limit
     filters::limit merged_limit = decider::mergeTimedPair(pair.value());
 
     custom_msgs::msg::Distance msg;
