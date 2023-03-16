@@ -15,7 +15,7 @@ Node::Node(): rclcpp::Node("decider") {
     this->declare_parameter<std::string>("topics.sub.camera",   "/lidar_path_width");
     this->declare_parameter<std::string>("topics.sub.lidar",    "/camera_path_width");
     this->declare_parameter<std::string>("topics.pub",          "/path_width");
-    this->declare_parameter<int>   ("params.timer_delay",       50); //[ms]
+    this->declare_parameter<int>   ("params.timer_delay",       200); //[ms]
     this->declare_parameter<double>("params.time_diff_thr",     1.0); //[s]
     this->declare_parameter<double>("params.disgard_time_thr",  25.0); //[s]
 

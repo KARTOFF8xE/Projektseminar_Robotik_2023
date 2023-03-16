@@ -6,7 +6,7 @@ decider:
     #     camera:
     #     lidar:  
     #   pub:
-    params:
-      timer_delay: 200
-    #  time_diff_thr:
-    #  disgard_time_thr:
+    # params:
+    #   timer_delay:
+    #   time_diff_thr:
+    #   disgard_time_thr:
