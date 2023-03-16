@@ -4,7 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-void visualize_path::visualize_street_view(std::vector<filters::limit> limits_vec, double wheel_inside, double wheel_width) {
+void visualize_path::visualize_street_view(std::vector<filters::limit> limits_vec, double wheel_inside, double wheel_width, std::string window_name) {
     /**
      * The left Limit of the Curbstone is drawn in green
      * The right Limit of the Curbstone is drawn in red
@@ -55,7 +55,7 @@ void visualize_path::visualize_street_view(std::vector<filters::limit> limits_ve
     /**
      * Show the Window and close the entire launch, if "Esc" is pressed
     */
-    imshow("Streetview", img);
+    imshow(window_name, img);
 	if (cv::waitKey(10) == 27) { //exit on ESC
         exit(0);
     }

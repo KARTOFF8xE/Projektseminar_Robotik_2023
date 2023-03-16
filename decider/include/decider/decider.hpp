@@ -1,37 +1,42 @@
 #pragma once
 
 #include <vector>
-#include <tuple>
-#include <rclcpp/time.hpp>
+#include <utility>
+#include <optional>
+
+#include "rclcpp/time.hpp"
+#include "rclcpp/logger.hpp"
+
+#include "filters/post_filters.hpp"
+
+std::ostream &operator<<(std::ostream& stream, const rclcpp::Time& rvalue);
 
 namespace decider {
-    struct limit {
-        // left limit
-        double limit = 0;
-        // time of the measurement
-        rclcpp::Time timestamp;
-    };
-
-    struct limits {
-        // left limit
-        double right_limit;
-        // right limit
-        double left_limit;
-        // time of the measurement
-        rclcpp::Time timestamp;
-    };
-
     /**
-     * Trys to combine several limit values from the given vectors.
+     * Retrieve pair of limits that are temporally close enough to each other.
      * 
-     * @param limit_hf:  The limit for which we try to find a Partner
-     * @param limits_lf: The Buffer with Limits of possible Partners
+     * @param camera_buffer: camera limits in ascending order (oldest to newest)
+     * @param liar_buffer: lidar limits in ascending order (oldest to newest)
+     * @param time_difference_thr: threshold in seconds that determines what "close enough" means
+     * @param logger: ros2 logger for debug information
      * 
-     * @return The Result-Limit of up to two Limits
+     * @return detected pair of values or nullopt if none was found
     */
-    decider::limit get_limits(
-        decider::limit limit_hf,
-        std::vector<decider::limit> limits_lf
+    std::optional<std::pair<filters::limit, filters::limit>> getTimedPair(
+        std::vector<filters::limit>& camera_buffer,
+        std::vector<filters::limit>& lidar_buffer,
+        double time_difference_thr,
+        rclcpp::Logger logger
     );
 
+    /**
+     * Merge the pair into one limit by combining or choosing.
+     * 
+     * @param pair: pair to be merged
+     * 
+     * @return merged limit
+    */
+    filters::limit mergeTimedPair(
+        const std::pair<filters::limit, filters::limit>& pair
+    );
 }

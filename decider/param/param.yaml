@@ -2,5 +2,11 @@ decider:
   ros__parameters:
     _: null #placeholder/dummy
     # topics:
-    #   subscribe_topic:  
-    #   publish_topic:
+    #   sub:
+    #     camera:
+    #     lidar:  
+    #   pub:
+    params:
+      timer_delay: 200
+    #  time_diff_thr:
+    #  disgard_time_thr:

@@ -1,55 +1,92 @@
 #include "decider.hpp"
 
-#include <iostream>
+#include "rclcpp/logging.hpp"
 
-decider::limit decider::get_limits(decider::limit limit_lf, std::vector<decider::limit> limits_hf) {
-    const double time_thr = 1.0; // just don't change
-    decider::limit limit;
+#include <numeric>
 
-    /**
-     * Removes all Limits from the Buffer that lay too far in the past
-    */
-    int i = 0;
-    while ((!limits_hf.empty()) && limits_hf.size() > i && (limit_lf.timestamp.seconds() - limits_hf[i].timestamp.seconds() > time_thr)) {
-        std::cout << "[debug] on i=" << i << " got diff: " << limit_lf.timestamp.seconds() - limits_hf[i].timestamp.seconds() << std::endl;
-        i++;
-    }
-    limits_hf.erase(limits_hf.begin(), limits_hf.begin() + i);
-    
-    /**
-     * If there is no Value inside the Buffer:                                                      Nothing Happens
-     * If there is one Value inside the Buffer & it is not too far in the Future:                   We collect it
-     * If there are several Values inside The Buffer & the first one is not too far in the Future:  We collect the one that has a lower TimeDifference than the following Value
-     * 
-     * "Invalid" Values will always be removed, invalid Values are checked, but not selected Values
-    */
-    if ((!limits_hf.empty()) && (limit_lf.timestamp.seconds() - limits_hf[0].timestamp.seconds() > -time_thr)) {
-        if (limits_hf.size() == 1) {
-            limit = limits_hf[0];
-            limits_hf.erase(limits_hf.begin());
-        }
-        while ((limit_lf.timestamp.seconds() - limits_hf[0].timestamp.seconds() > -time_thr) && limits_hf.size() >= 2) {
-            if (std::abs(limit_lf.timestamp.seconds() - limits_hf[0].timestamp.seconds()) > std::abs(limit_lf.timestamp.seconds() - limits_hf[1].timestamp.seconds())) {
-                limits_hf.erase(limits_hf.begin());
-                continue;
-            } else {
-                limit = limits_hf[0];
-                limits_hf.erase(limits_hf.begin());
+std::ostream &operator<<(std::ostream& stream, const rclcpp::Time& rvalue) {
+    double time = rvalue.seconds();
+    int32_t seconds = time;
+    int32_t nanoseconds = (time - seconds) * 1000.0 * 1000.0;
+
+    stream << seconds << "s " << nanoseconds << "ns";
+
+    return stream;
+}
+
+std::optional<std::pair<filters::limit, filters::limit>> decider::getTimedPair(std::vector<filters::limit>& camera_buffer, std::vector<filters::limit>& lidar_buffer, double time_difference_thr, rclcpp::Logger logger) {
+    filters::limit camera_limit, lidar_limit;
+    std::vector<filters::limit>::iterator lidar_buffer_end  = lidar_buffer.end(),
+                                          camera_buffer_end = camera_buffer.end();
+
+    //iterate from beginning to end to go from oldest to newest
+    //this assumes that all is in ascending order
+    double difference, min_difference = std::numeric_limits<double>::max();
+    std::vector<filters::limit>::iterator camera_limit_iter, lidar_limit_iter;
+    for (camera_limit_iter = camera_buffer.begin(); camera_limit_iter != camera_buffer_end; camera_limit_iter++) { //camera is outer since it probably has more values
+        for (lidar_limit_iter = lidar_buffer.begin(); lidar_limit_iter != lidar_buffer_end; lidar_limit_iter++) {
+            //get difference and log the smallest for debugging
+            difference = std::abs(camera_limit_iter->timestamp.seconds() - lidar_limit_iter->timestamp.seconds());
+            min_difference = std::min(difference, min_difference);
+            
+            //check if any lidar values are in range
+            if (difference < time_difference_thr) {
+                camera_limit = *camera_limit_iter;
+                lidar_limit = *lidar_limit_iter;
+
                 break;
             }
         }
+        if (lidar_limit_iter != lidar_buffer_end) {
+            break;
+        }
     }
 
-    /**
-     * If we only have a valid Limit from the Buffer:                                   take it
-     * If we have collected a Limit from the Buffer and an existing one for the Check:  combine them
-     * If we have no Limit from the Buffer, but one for the Check:                      take the one of the Check
-     * If we have no Limits:                                                            Impossible to find a Limit this Time
-    */
-    if (!(limit_lf.limit > 0)) {
-        return limit;
-    }
-    limit = (limit.limit > 0) ? decider::limit{(limit_lf.limit * limit.limit) / 2, limit_lf.timestamp} : limit_lf;
+    //check if match was found
+    if (camera_limit_iter == camera_buffer_end) { //no match was found
+        RCLCPP_INFO_STREAM(logger, "[get timed pair] No pair found - closest: " << min_difference);
 
-    return limit;
+        return std::nullopt;
+    } else {
+        RCLCPP_INFO_STREAM(logger, "[get timed pair] Found camera @ " << camera_limit.timestamp << " and lidar @ " << lidar_limit.timestamp << " with difference " << difference << 's');
+
+        //erase current and all older limits
+        lidar_buffer.erase(lidar_buffer.begin(), lidar_limit_iter + 1);
+        camera_buffer.erase(camera_buffer.begin(), camera_limit_iter + 1);
+
+        return std::make_pair(camera_limit, lidar_limit);
+    }
+}
+
+filters::limit decider::mergeTimedPair(const std::pair<filters::limit, filters::limit>& pair) {
+    filters::limit output;
+
+    //TODO: is das sinnvoll?!?
+    output.timestamp = rclcpp::Time((pair.first.timestamp.nanoseconds() + pair.second.timestamp.nanoseconds()) / 2.0f);
+
+    //left
+    bool first_has_left     = (pair.first.left  > 0.0f),
+         second_has_left    = (pair.second.left > 0.0f);
+    if (first_has_left && second_has_left) {
+        output.left = std::min(pair.first.left, pair.second.left);
+        //output.left = (pair.first.left + pair.second.left) / 2.0f;
+    } else if (first_has_left) {
+        output.left = pair.first.left;
+    } else if (second_has_left) { //if is unnecessary here, but it makes it more clear what happens
+        output.left = pair.second.left;
+    }
+
+    //right
+    bool first_has_right    = (pair.first.right  > 0.0f),
+         second_has_right   = (pair.second.right > 0.0f);
+    if (first_has_right && second_has_right) {
+        output.right = std::min(pair.first.right, pair.second.right);
+        //output.right = (pair.first.right + pair.second.right) / 2.0f;
+    } else if (first_has_right) {
+        output.right = pair.first.right;
+    } else if (second_has_right) { //if is unnecessary here, but it makes it more clear what happens
+        output.right = pair.second.right;
+    }
+
+    return output;
 }

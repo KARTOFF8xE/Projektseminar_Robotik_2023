@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -16,7 +16,10 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(custom_msgs REQUIRED)
+find_package(filters REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
@@ -27,7 +30,7 @@ list(APPEND SOURCES "src/node.cpp")
 list(APPEND SOURCES "src/decider.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} filters::filters_lib)
 ament_target_dependencies(${PROJECT_NAME} rclcpp custom_msgs)
 
 install(

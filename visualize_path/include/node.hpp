@@ -21,4 +21,5 @@ class Node: public rclcpp::Node {
     rclcpp::Subscription<custom_msgs::msg::Distance>::SharedPtr    sub;
 
     std::vector<filters::limit> limits_vec;
+    std::string sub_topic;
 };
