@@ -14,6 +14,7 @@ namespace visualize_path {
     void visualize_street_view(
         std::vector<filters::limit> limits_vec,
         double wheel_inside,
-        double wheel_width
+        double wheel_width,
+        std::string window_name
     );
 }
