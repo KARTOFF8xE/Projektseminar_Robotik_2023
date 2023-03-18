@@ -76,14 +76,14 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     /*** Filter for runaways ***/
     if (limits_vec.size() > ((2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1))) {
         size_t i = limits_vec.size() - ((custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1));
-        limits_vec[i] = filters::filter_for_runaways(limits_vec, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
+        limits_vec[i] = filters::bubble_filter(limits_vec, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
 
     } 
 
     /*** Filter for Islands ***/
     if (limits_vec.size() > ((2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1) + (2 * custom_parameters.quantity_check_for_island + 1))) {
         size_t i = limits_vec.size() - ((custom_parameters.quantity_check_for_island + 1) + (2 * custom_parameters.quantity_check_for_runaways + 1) + (2 * custom_parameters.quantity_check_for_avg_dist + 1));
-        limits_vec[i] = filters::check_for_valid_island(limits_vec, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
+        limits_vec[i] = filters::island_filter(limits_vec, custom_parameters.quantity_check_for_island, custom_parameters.counter_thr_for_island, i);
     }
 
     /*** Visualize anything, if wanted ***/

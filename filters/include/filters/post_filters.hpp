@@ -30,7 +30,7 @@ namespace filters {
      * 
      * @return the validated limit pair at i
     */
-    filters::limit filter_for_runaways(
+    filters::limit bubble_filter(
         std::vector<filters::limit> limit_vec,
         double distance_thr,
         size_t quantity_check,
@@ -68,7 +68,7 @@ namespace filters {
      * 
      * @return the limit pair at i with corresponding distance_average (if existing, otherwise -1)
     */
-    filters::limit check_for_valid_island(
+    filters::limit island_filter(
         std::vector<filters::limit> limits_vec,
         size_t quantity_check,
         size_t counter_thr,
