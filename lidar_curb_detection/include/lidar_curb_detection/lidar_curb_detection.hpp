@@ -50,8 +50,8 @@ namespace lidar_curb_det {
     /**
      * Check for specified Threshold if the detected height_difference is an Curbstone or something else like a pott-hole
      * 
-     * @param height_line: the in "get_height_line" transformed height line
      * @param height_diff: defines the needed height difference [in meters] between the road and the curbstone
+     * @param height_line: the in "get_height_line" transformed height line
      * @param drive_line: the height of the driving plane
      * @param j: tells the LiDAR-Ray that detected a possible curbstone
      * @param advanced_ray_check_thr: the threshold how many Meters should be checked to detect if a possible curbstone is more likely a pott hole
@@ -60,8 +60,8 @@ namespace lidar_curb_det {
      * @returns boolean if curbstone if really a curbstone
     */
     bool curb_still_valid(
-        std::vector<lidar_curb_det::lidar_measures> height_line,
         double height_diff,
+        std::vector<lidar_curb_det::lidar_measures> height_line,
         double drive_line,
         size_t j,
         double advanced_ray_check_thr,
@@ -85,11 +85,7 @@ namespace lidar_curb_det {
      * Vector-Based check for a Curbstone
      * 
      * @param height_line: the in "get_height_line" transformed height line
-     * @param height_diff: defines the needed height difference [in meters] between the road and the curbstone
      * @param angle_threshold: defines the needed angle difference [in degree] between the road and the curbstone
-     * @param advanced_ray_check_thr: the threshold how many Meters should be checked to detect if a possible curbstone is more likely a pott hole
-     * @param distance from the center of the robot to the inside of each wheel
-     * @param timestamp of the analysed measurement
      * 
      * @returns left and/or right distance to curbstone as lidar_curb_det::limit-struct (from horizontal Robot-Center) if existing. Returning -1 per side if not existing fot the side
     */
@@ -97,6 +93,7 @@ namespace lidar_curb_det {
         std::vector<lidar_curb_det::lidar_measures> height_line,
         double height_diff,
         double angle_threshold,
+        size_t max_check_length,
         double advanced_ray_check_thr,
         double wheel_inside,
         rclcpp::Time tstamp
@@ -108,8 +105,6 @@ namespace lidar_curb_det {
      * @param height_line: the in "get_height_line" transformed height line
      * @param left_border: the left Limit of the way driven on
      * @param right_border: the right Limit of the way driven on
-     * @param distance from the center of the robot to the inside of each wheel
-     * @param width of the wheels
      * 
      * @returns nothing
     */
