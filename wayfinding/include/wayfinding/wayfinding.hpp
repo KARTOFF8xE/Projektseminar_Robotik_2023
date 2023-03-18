@@ -159,6 +159,7 @@ namespace wayfinding {
          * 
          * @param lines: prefiltered, detected image lines
          * @param scan_height: level at which to scan for distances [px]
+         * @param height: image height
          * 
          * @return pair of left (first) and right (second) distances
         */
