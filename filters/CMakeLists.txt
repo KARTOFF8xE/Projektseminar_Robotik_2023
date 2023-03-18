@@ -24,23 +24,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
 link_directories(${OpenCV_LIBRARY_DIRS})
 
 set(LIB_SOURCES "")
-list(APPEND LIB_SOURCES "src/color_filter.cpp")
-list(APPEND LIB_SOURCES "src/range_filter.cpp")
 list(APPEND LIB_SOURCES "src/encoding_filter.cpp")
 list(APPEND LIB_SOURCES "src/post_filters.cpp")
 
 add_library(${PROJECT_NAME}_lib "include/${PROJECT_NAME}/filters.hpp" ${LIB_SOURCES})
 ament_target_dependencies(${PROJECT_NAME}_lib sensor_msgs)
-
-add_executable(${PROJECT_NAME} "src/main.cpp")
-add_definitions(-O3)
-
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${PROJECT_NAME}_lib)
-
-install(TARGETS
-  ${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME}
-)
+target_link_libraries(${PROJECT_NAME}_lib ${OpenCV_LIBRARIES})
 
 ament_export_targets(${PROJECT_NAME}_lib HAS_LIBRARY_TARGET)
 
