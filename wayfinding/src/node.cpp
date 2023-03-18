@@ -277,7 +277,7 @@ void Node::callback_rgb_image(const sensor_msgs::msg::Image::SharedPtr msg, rclc
     //filter for runaways
     if (buffer_size > this->runaways_min_buffer_size) {
         size_t i = buffer_size - (this->runaways_min_buffer_size - custom_parameters.quantity_check_for_runaways);
-        limits_buffer[i] = filters::filter_for_runaways(limits_buffer, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
+        limits_buffer[i] = filters::bubble_filter(limits_buffer, custom_parameters.distance_thr, custom_parameters.quantity_check_for_runaways, custom_parameters.quantity_thr, i);
     } 
 
     //filter for islands

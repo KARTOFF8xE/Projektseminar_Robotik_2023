@@ -4,25 +4,24 @@ lidar_curb_detection:
     # topics:
     #   flux:
     #   dmc:
-    #     laserscan:                  # For Receiving the Pointcloud of the LiDAR
-    #   pub:                          # Topic for Publishing the solutions
+    #     laserscan:                  # where to receive the pointcloud of the LiDAR
+    #   pub:                          # Topic for publishing the solutions
     # robot_specific:
-    #   wheel_inside:                 # Width of the Wheels   
-    #   wheel_width:                  # Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels
-    #   mounting_angle:               # The Mounting-Angle of the LiDAR
+    #   wheel_inside:                 # Width of the wheels
+    #   wheel_width:                  # Distance of the vertical plane in the center of the Robot to the vertical inside plane of the wheels
+    #   mounting_angle:               # The mounting-angle of the LiDAR
     # detection_thr:
-    #   angle_thr:                    # Minimum angle between two Vectors that is needed to detect a Curbstone 
-    #   height_diff:                  # Height_Difference that must exist, to detect a Curbstone
-    #   advanced_ray_check_thr:       # Distance a possible Curbstone should be proofed, that it isn't a Pothole           
-    #   max_check_length:             # Quantity of Rays that should be checked for a Curbstone    
+    #   angle_thr:                    # Minimum angle between two vectors that is needed to detect a curbstone
+    #   height_diff:                  # Height_difference that must exist, to detect Curbstones
+    #   advanced_ray_check_thr:       # Distance a possible curbstone should be proofed, that it isn't a pothole
     # bubble:
     #   distance_thr:                 # Threshold that tells the filter, how far another Point is allowed to be away to be valid
-    #   quantity_check:               # Amount of Limits that is checked in each direction (before and behind)
-    #   quantity_thr:                 # Minimum amount of valid Points that needs to lay inside the distance_thr
+    #   quantity_check:               # Amount of limits that is checked in each direction (before and behind)
+    #   quantity_thr:                 # Minimum amount of valid points that needs to lay inside the distance_thr
     # avg_dist:
-    #   avg_dist_thr:                 # distance-averages below this Threshold are validating the Limit
-    #   quantity_check:               # Amount of Limits that is checked in each direction (before and behind)
+    #   avg_dist_thr:                 # distance-averages below this threshold are validating the Limit
+    #   quantity_check:               # Amount of limits that is checked in each direction (before and behind)
     #   counter_thr:                  # Minimum amount of taken distance-differences that is needed for the average-calculation, otherwise the limit is not valid
     # island:
-    #   quantity_check:               # Amount of Limits that is checked in each direction (before and behind)
-    #   counter_thr:                  # Needed Quantity of Valid Limits to validate the looked up Limit
+    #   quantity_check:               # Amount of limits that is checked in each direction (before and behind)
+    #   counter_thr:                  # Needed quantity of valid limits to validate the looked up Limit

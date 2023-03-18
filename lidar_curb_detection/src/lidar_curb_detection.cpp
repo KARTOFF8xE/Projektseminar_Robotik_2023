@@ -68,7 +68,7 @@ std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::sort_height_line(std
     return height_line;
 }
 
-bool lidar_curb_det::curb_still_valid(double height_diff, std::vector<lidar_curb_det::lidar_measures> height_line, double drive_line, size_t j, double advanced_ray_check_thr, int factor) {
+bool lidar_curb_det::curb_still_valid(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double drive_line, size_t j, double advanced_ray_check_thr, int factor) {
     /**
      * Iterating above the next {advanced_ray_check_thr} Rays in Range and check, if the height_difference still exists
      * -> if not: detecting it as Pothole
@@ -104,7 +104,7 @@ double get_angle(lidar_curb_det::lidar_measures v1, lidar_curb_det::lidar_measur
     return angle;
 }
 
-filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double angle_threshold, size_t max_check_length, double advanced_ray_check_thr, double wheel_inside, rclcpp::Time tstamp) {    
+filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double angle_threshold, double advanced_ray_check_thr, double wheel_inside, rclcpp::Time tstamp) {    
     angle_threshold =  M_PI * std::abs(angle_threshold) / 180;
     double left_limit = 0, right_limit = 0;
     size_t i = 0;
@@ -117,12 +117,10 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
         i++;
     } while (i < height_line.size() && height_line[i].distance < -(wheel_inside));
 
-    size_t check_length = ((i - 2) < max_check_length) ? i - 2 : max_check_length;
-
     /**
      * Create 2 Vectors out of 3 neighbored Points and calculate the angle between those
     */
-    for (size_t j = i - 1; j > i - check_length; j--) {
+    for (size_t j = i - 1; j > 2; j--) {
         lidar_curb_det::lidar_measures v1 = lidar_curb_det::lidar_measures{
             std::abs(height_line[j].distance - height_line[j - 1].distance),
             std::abs(height_line[j].height   - height_line[j - 1].height)
@@ -139,7 +137,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
          */
         double drive_line = height_line[j].height;
         if (std::abs(angle) > angle_threshold) {
-            if (curb_still_valid(height_diff, height_line, drive_line, j - 2, advanced_ray_check_thr, - 1)) {
+            if (curb_still_valid(height_line, height_diff, drive_line, j - 2, advanced_ray_check_thr, - 1)) {
                 left_limit = std::abs(height_line[j - 1].distance);
                 break;
             }
@@ -152,7 +150,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
     while (height_line[i].distance < wheel_inside && i < height_line.size()) {
         i++;
     }
-    for (size_t j = i; j < i + max_check_length; j++) {
+    for (size_t j = i; j < height_line.size() - 3; j++) {
         lidar_curb_det::lidar_measures v1 = lidar_curb_det::lidar_measures{
             std::abs(height_line[j].distance - height_line[j + 1].distance),
             std::abs(height_line[j].height   - height_line[j + 1].height)
@@ -164,7 +162,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
         double angle = ::get_angle(v1, v2);
         double drive_line = height_line[j].height;
         if (std::abs(angle) > angle_threshold) {
-            if (curb_still_valid(height_diff, height_line, drive_line, j + 2, advanced_ray_check_thr, 1)) {
+            if (curb_still_valid(height_line, height_diff, drive_line, j + 2, advanced_ray_check_thr, 1)) {
                 right_limit = std::abs(height_line[j + 1].distance);
                 break;
             }
