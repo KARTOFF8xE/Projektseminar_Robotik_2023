@@ -48,10 +48,6 @@ For a detailed description of the used filters, take a look at its [README](../f
         _type_: double <br>
         _default_: .2 <br>
         _unit_: meters <br>
-    - __max_check_length__: Quantity of Rays that should be checked for a Curbstone. <br>
-        _type_: integer <br>
-        _default_: 75 <br>
-        _unit_: quantity <br>
 - __bubble__: <br>
     - __distance_thr__: Threshold that tells the filter, how far another Point is allowed to be away to be valid. <br>
         _type_: double <br>
