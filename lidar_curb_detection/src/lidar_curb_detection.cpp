@@ -68,7 +68,7 @@ std::vector<lidar_curb_det::lidar_measures> lidar_curb_det::sort_height_line(std
     return height_line;
 }
 
-bool lidar_curb_det::curb_still_valid(double height_diff, std::vector<lidar_curb_det::lidar_measures> height_line, double drive_line, size_t j, double advanced_ray_check_thr, int factor) {
+bool lidar_curb_det::curb_still_valid(std::vector<lidar_curb_det::lidar_measures> height_line, double height_diff, double drive_line, size_t j, double advanced_ray_check_thr, int factor) {
     /**
      * Iterating above the next {advanced_ray_check_thr} Rays in Range and check, if the height_difference still exists
      * -> if not: detecting it as Pothole
@@ -137,7 +137,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
          */
         double drive_line = height_line[j].height;
         if (std::abs(angle) > angle_threshold) {
-            if (curb_still_valid(height_diff, height_line, drive_line, j - 2, advanced_ray_check_thr, - 1)) {
+            if (curb_still_valid(height_line, height_diff, drive_line, j - 2, advanced_ray_check_thr, - 1)) {
                 left_limit = std::abs(height_line[j - 1].distance);
                 break;
             }
@@ -162,7 +162,7 @@ filters::limit lidar_curb_det::curbstone_checker_vectors(std::vector<lidar_curb_
         double angle = ::get_angle(v1, v2);
         double drive_line = height_line[j].height;
         if (std::abs(angle) > angle_threshold) {
-            if (curb_still_valid(height_diff, height_line, drive_line, j + 2, advanced_ray_check_thr, 1)) {
+            if (curb_still_valid(height_line, height_diff, drive_line, j + 2, advanced_ray_check_thr, 1)) {
                 right_limit = std::abs(height_line[j + 1].distance);
                 break;
             }
