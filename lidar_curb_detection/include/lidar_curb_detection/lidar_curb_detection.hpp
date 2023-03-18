@@ -93,7 +93,6 @@ namespace lidar_curb_det {
         std::vector<lidar_curb_det::lidar_measures> height_line,
         double height_diff,
         double angle_threshold,
-        size_t max_check_length,
         double advanced_ray_check_thr,
         double wheel_inside,
         rclcpp::Time tstamp
