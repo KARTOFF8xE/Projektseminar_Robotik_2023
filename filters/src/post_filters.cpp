@@ -1,7 +1,7 @@
 #include "post_filters.hpp"
 #include <math.h>
 
-filters::limit filters::bubble_filter(std::vector<filters::limit> limits_vec, double distance_thr, size_t quantity_check, size_t quantity_thr, size_t i) {
+filters::limit filters::filter_for_runaways(std::vector<filters::limit> limits_vec, double distance_thr, size_t quantity_check, size_t quantity_thr, size_t i) {
     /**
      * Define Counter, to count valid neighbours (Later they will be decreased by one, cause any Limit also gets compared to itself).
      * Extract the checked Limit_Pair that will be returned later
@@ -90,7 +90,7 @@ filters::limit filters::noise_filter(std::vector<filters::limit> limits_vec, siz
     };
 }
 
-filters::limit filters::island_filter(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, const size_t i) {
+filters::limit filters::check_for_valid_island(std::vector<filters::limit> limits_vec, size_t quantity_check, size_t counter_thr, const size_t i) {
     /**
      * Needed Variables get instantiated and detected, if they are valid
     */

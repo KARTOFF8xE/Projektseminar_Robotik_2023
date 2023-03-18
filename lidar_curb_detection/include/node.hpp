@@ -25,6 +25,7 @@ class Node: public rclcpp::Node {
         double distance_thr;
         double height_diff;
         double avg_dist_thr;
+        u_int max_check_length;
         u_int quantity_check_for_runaways;
         u_int quantity_thr;
         u_int angle_thr;
