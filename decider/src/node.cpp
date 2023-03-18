@@ -17,12 +17,14 @@ Node::Node(): rclcpp::Node("decider") {
     this->declare_parameter<std::string>("topics.pub",          "/path_width");
     this->declare_parameter<int>   ("params.timer_delay",       200); //[ms]
     this->declare_parameter<double>("params.time_diff_thr",     1.0); //[s]
+    this->declare_parameter<double>("params.disgard_time_thr",  25.0); //[s]
 
     this->get_parameter("topics.sub.camera",        custom_parameters.sub_topic_camera);
     this->get_parameter("topics.sub.lidar",         custom_parameters.sub_topic_lidar);
     this->get_parameter("topics.pub",               custom_parameters.pub_topic);
     this->get_parameter("params.timer_delay",       custom_parameters.timer_delay);
     this->get_parameter("params.time_diff_thr",     custom_parameters.time_diff_thr);
+    this->get_parameter("params.disgard_time_thr",  custom_parameters.disgard_time_thr);
 
     this->sub_camera    = this->create_subscription<custom_msgs::msg::Distance>(custom_parameters.sub_topic_camera, rclcpp::SystemDefaultsQoS(), std::bind(&Node::callback_camera, this, _1));
     this->sub_lidar     = this->create_subscription<custom_msgs::msg::Distance>(custom_parameters.sub_topic_lidar,  rclcpp::SystemDefaultsQoS(), std::bind(&Node::callback_lidar,  this, _1));

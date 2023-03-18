@@ -127,7 +127,7 @@ void wayfinding::line_detection::lineFilter(const std::vector<cv::Vec4i>& src, s
 double lineMetric(double angle, double length, double vertical, double horizontal, double angle_threshold, int vertical_threshold, int horizontal_threshold) {
     double vertical_factor   = 1.0 - std::abs(1.0 - vertical / vertical_threshold),
            horizontal_factor = 1.0 - std::abs(1.0 - horizontal / horizontal_threshold),
-           angle_factor      = std::abs(1.0 - angle / angle_threshold);
+           angle_factor      = std::abs(1.0 - angle / angle_threshold); //75.0
 
     return (angle_factor * length) + (horizontal_factor * horizontal) + (vertical_factor * vertical);
 }
@@ -147,7 +147,7 @@ double wayfinding::line_detection::imageMetric(const std::vector<cv::Vec4i>& lin
     double length;
     double angle;
 
-    double metric_counter = 0.0;
+    double metric_counter = 0;
     
     for (cv::Vec4i line: lines) {
         x_0 = line[0]; y_0 = line[1];
@@ -229,9 +229,8 @@ std::pair<int, int> wayfinding::line_detection::getLeftRightDistance(const std::
 
     for (cv::Vec4i line: lines) {
         y_0 = line[1]; y_1 = line[3];
-        
-        //since we can't be sure that (y_0 < y_1) always applies
-        std::tie(min_y, max_y) = std::minmax(y_0, y_1);
+        //since we can't be sure that (y_0 < y_1) applies:
+        min_y = std::min(y_0, y_1); max_y = std::max(y_0, y_1);
 
         if (min_y <= scan_height || scan_height <= max_y) { //check if the lines crosses the scan_line (horizontal @ y = scan_height)
             x_0 = line[0]; x_1 = line[2];
