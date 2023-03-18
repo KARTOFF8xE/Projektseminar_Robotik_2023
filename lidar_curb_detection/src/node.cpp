@@ -19,7 +19,6 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->declare_parameter<int>    ("detection_thr.angle_thr",             4);                 // Minimum angle between two Vectors that is needed to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.height_diff",           .05);               // Height_Difference that must exist, to detect a Curbstone
     this->declare_parameter<double> ("detection_thr.advanced_ray_check_thr",.2);                // Distance a possible Curbstone should be proofed, that it isn't a Pothole
-    this->declare_parameter<int>    ("detection_thr.max_check_length",      75);                // Quantity of Rays that should be checked for a Curbstone
     this->declare_parameter<double> ("bubble.distance_thr",                 .4);                // Threshold that tells the filter, how far another Point is allowed to be away to be valid
     this->declare_parameter<int>    ("bubble.quantity_check",               14);                // Amount of Limits that is checked in each direction (before and behind)
     this->declare_parameter<int>    ("bubble.quantity_thr",                 15);                // Minimum amount of valid Points that needs to lay inside the distance_thr
@@ -41,7 +40,6 @@ Node::Node(bool do_visualize): rclcpp::Node("lidar_curb_detection") {
     this->get_parameter("detection_thr.angle_thr",              custom_parameters.angle_thr);
     this->get_parameter("detection_thr.height_diff",            custom_parameters.height_diff);
     this->get_parameter("detection_thr.advanced_ray_check_thr", custom_parameters.advanced_ray_check_thr);
-    this->get_parameter("detection_thr.max_check_length",       custom_parameters.max_check_length);
     this->get_parameter("avg_dist.quantity_check",              custom_parameters.quantity_check_for_avg_dist);
     this->get_parameter("avg_dist.counter_thr",                 custom_parameters.counter_thr_for_avg);
     this->get_parameter("avg_dist.avg_dist_thr",                custom_parameters.avg_dist_thr);
@@ -64,7 +62,7 @@ void Node::callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     height_line = lidar_curb_det::sort_height_line(height_line);
     
     /*** Calculate Limits (if possible) with the help of the Vectors and add those Limits to a List of Limits ***/
-    filters::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.max_check_length, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside, msg->header.stamp);
+    filters::limit limit = lidar_curb_det::curbstone_checker_vectors(height_line, custom_parameters.height_diff, custom_parameters.angle_thr, custom_parameters.advanced_ray_check_thr, custom_parameters.wheel_inside, msg->header.stamp);
     this->limits_vec.push_back(limit);
 
     /*** Filter for to high deviations ***/
