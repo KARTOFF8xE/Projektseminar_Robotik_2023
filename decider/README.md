@@ -37,7 +37,7 @@ When only one of both limits has a valid left value, it is chosen. If none of bo
 
 ## Launch
 
-### `decider.launch.py`
+#### `decider.launch.py`
 
 Start the decider itself with its parameter file.
 
@@ -46,7 +46,7 @@ Options:
    _default_: info  
    _options_: debug | info | warn | error | fatal
 
-### `start_all.launch.py`
+#### `start_all.launch.py`
 
 This launch file is made to start the whole assembly of wayfinding, lidar_curb_detection, decider and up to two visualize_path instances together.  
 The topics for the flux and dmc bags automatically get loaded from the `launch/default_topics.yaml` and parameter file of the package.
@@ -60,7 +60,7 @@ Options:
    _default_: ''
  - __dmc__: The path to the dmc bag (relative to the bag_dir) from which to play back from.  
    _default_: ''
- - __debug_visualize__: Wether or not to activate visualizations in lidar_curb_detection and wayfinding that allow further inside in their inner workings.  
+ - __debug_visualize__: Wether or not to activate visualizations in lidar_curb_detection and wayfinding that allow further insight in their inner workings.  
    _default_: False  
    _options_: True | False
  - __output_visualize__: Wether or not to visualize the output topics with visualize_path package.  
