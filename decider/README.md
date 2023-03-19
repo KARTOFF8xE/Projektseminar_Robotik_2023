@@ -8,7 +8,7 @@ Furthermore it provides a launch file to start the decider itself and one to lau
 For each datastream there is a buffer which will take in ALL published messages as a `filters::limit` regardless of their validity.  
 On a set rate a method will be called that goes over all values from each buffer (starting with the oldest) and compares them. The first values which are close enough, meaning their time difference is lower then a given threshold.  
 If no pair is found then the method exists without publishing a message, otherwise the pair gets returned and merged.  
-Merging, in this case, means that if both, the cameras and the lidars, limits have e.g. a value to the left, the resulting left value would be the minimum¹ of both values.  
+In this context, merging means that if the limits of both sensors have a value to the same side, the result would be the minimum¹ of both values.  
 When only one of both limits has a valid left value, it is chosen. If none of both limits have a valid left value it would result in 0.
 
 ¹ The minimum is chosen over the average since in this case the values coming from the camera can be quite eradic and would have a high impact on the average. As to why those values are like that, consult the wayfinding [README](../wayfinding/README.md).
@@ -65,7 +65,7 @@ Options:
    _options_: True | False
  - __output_visualize__: Wether or not to visualize the output topics with visualize_path package.  
    _default_: none  
-   _options_: both | lidar | camera | none
+   _options_: all | sensors | lidar | camera | decider | none
  - __log_level__: Setup the general output log level for this node.  
    _default_: info  
    _options_: debug | info | warn | error | fatal

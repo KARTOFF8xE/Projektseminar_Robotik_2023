@@ -10,9 +10,11 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import ExecuteProcess, DeclareLaunchArgument, LogInfo, IncludeLaunchDescription, GroupAction
 
 #output visualization mdoes:
-BOTH    = "both";
+ALL     = "all";
+SENSORS = "sensors";
 LIDAR   = "lidar";
 CAMERA  = "camera";
+DECIDER = "decider";
 NONE    = "none";
 
 #load default topic maps
@@ -60,6 +62,16 @@ def generate_launch_description():
     flux_topics = list(set.union(lidar_curb_detection_flux_topic_set, wayfinding_flux_topic_set));
     dmc_topics  = list(set.union(lidar_curb_detection_dmc_topic_set, wayfinding_dmc_topic_set));
 
+    decider_share_dir = get_package_share_directory("decider");
+    with open(os.path.join(decider_share_dir, "param/param.yaml"), 'r') as param_yaml:
+        params: dict = yaml.safe_load(param_yaml);
+        params = params["decider"]["ros__parameters"];
+
+    if "topics" in params:
+        decider_pub_topic = params["topics"].get("pub", "/path_width");
+    else:
+        decider_pub_topic = "/path_width";
+
     ld = LaunchDescription(
         (
             DeclareLaunchArgument(
@@ -91,7 +103,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "output_visualize",
                 default_value=NONE,
-                choices=[BOTH, LIDAR, CAMERA, NONE],
+                choices=[ALL, SENSORS, LIDAR, CAMERA, NONE],
                 description="Turn on output visualization for lidar, camera or both."
             ),
             DeclareLaunchArgument(
@@ -106,7 +118,7 @@ def generate_launch_description():
     ld.add_action(
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory("decider"), "launch/decider.launch.py")
+                os.path.join(decider_share_dir, "launch/decider.launch.py")
             ),
             launch_arguments={
                 "log_level": log_level
@@ -166,7 +178,7 @@ def generate_launch_description():
                     )
                 )
             )
-        )
+        );
 
     if dmc_topics:
         ld.add_action(
@@ -196,12 +208,46 @@ def generate_launch_description():
                     )
                 )
             )
-        )
+        );
 
     ld.add_action(
         GroupAction(
             condition=LaunchConfigurationEquals(
-                "output_visualize", BOTH
+                "output_visualize", ALL
+            ),
+            actions=(
+                IncludeLaunchDescription(
+                    launch_description_source=PythonLaunchDescriptionSource(
+                        visualization_launch_file
+                    ),
+                    launch_arguments={
+                        "topic": decider_pub_topic
+                    }.items()
+                ),
+                IncludeLaunchDescription(
+                    launch_description_source=PythonLaunchDescriptionSource(
+                        visualization_launch_file
+                    ),
+                    launch_arguments={
+                        "topic": lidar_curb_detection_pub_topic
+                    }.items()
+                ),
+                IncludeLaunchDescription(
+                    launch_description_source=PythonLaunchDescriptionSource(
+                        visualization_launch_file
+                    ),
+                    launch_arguments={
+                        "topic": wayfinding_pub_topic
+                    }.items()
+                )
+            )
+        )
+    );
+
+    ld.add_action(
+        GroupAction(
+            condition=LaunchConfigurationEquals(
+                "output_visualize", SENSORS
             ),
             actions=(
                 IncludeLaunchDescription(
@@ -222,7 +268,21 @@ def generate_launch_description():
                 )
             )
         )
-    )
+    );
+
+    ld.add_action(
+        IncludeLaunchDescription(
+            condition=LaunchConfigurationEquals(
+                "output_visualize", DECIDER
+            ),
+            launch_description_source=PythonLaunchDescriptionSource(
+                visualization_launch_file
+            ),
+            launch_arguments={
+                "topic": decider_pub_topic
+            }.items()
+        )
+    );
 
     ld.add_action(
         IncludeLaunchDescription(
@@ -250,6 +310,6 @@ def generate_launch_description():
                 "topic": wayfinding_pub_topic
             }.items()
         )
-    )
+    );
 
     return ld
