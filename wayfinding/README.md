@@ -65,6 +65,10 @@ So instead it was opted for reverse transformation of the detected points in the
 ### Postfilters
 For a detailed description of the used filters, take a look at the post filters section [here](../filters/README.md).
 
+* This package also publishes invalid values: <br>
+    &rarr; "$0$" if the algorithm was not able to detect a limit <br>
+    &rarr; "$<0$" if the detected value does not pass one of the filters
+
 ## Parameters:
  - __topics__:
    - __flux__:

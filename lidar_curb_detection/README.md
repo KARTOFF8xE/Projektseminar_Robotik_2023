@@ -10,8 +10,12 @@ All points facing the ground are used, all other points are disgarded. Then all 
 ### Detect Curbstones and other Limits (walls, signs, etc.)
 Starting from the inside of the robot wheels, three neighboring points (1), (2), (3) are selected in a stepwise manner. Two vectors (1)&rarr;(2) and (2)&rarr;(3) are formed. Their angular difference is determined. If the angle difference exceeds a threshold value (parameter: detection_thr/angle_thr), there is a chance of finding a curb. The height of (1) is used as a reference height and gets compared to (3) and its successor points, which are within a certain distance (parameter: /detection_thr/advanced_ray_check_thr). If the difference remains above the threshold a pothole is out of the question. Otherwise the search continues as long as the maximum number of checks (parameter: detection_thr/max_check_length) has not yet been performed and further values exist. If the vector (2)&rarr;(3) points more towards the sky than the vector (1)&rarr;(2) and both the angle threshold and the height difference threshold are met, an obstacle is detected and immediately set as a boundary. The detected boundaries are returned to the node as a positive distance from the LiDAR and stored within a buffer. In case a boundary was not found, the value "0" is returned. Since the robot must have a width, "0" cannot be reached realistically.
 
-### Filters
+### Postfilters
 For a detailed description of the used filters, take a look at its [README](../filters/README.md).
+
+* This package also publishes invalid values: <br>
+    &rarr; "$0$" if the algorithm was not able to detect a limit <br>
+    &rarr; "$<0$" if the detected value does not pass one of the filters
 
 ## Parameters
 - __topics__:

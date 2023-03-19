@@ -11,6 +11,8 @@ If no pair is found then the method exists without publishing a message, otherwi
 Merging, in this case, means that if both, the cameras and the lidars, limits have e.g. a value to the left, the resulting left value would be the minimum¹ of both values.  
 When only one of both limits has a valid left value, it is chosen. If none of both limits have a valid left value it would result in 0.
 
+* This package only publishes valid values. <br>
+
 ¹ The minimum is chosen over the average since in this case the values coming from the camera can be quite eradic and would have a high impact on the average. As to why those values are like that, consult the wayfinding [README](../wayfinding/README.md).
 
 ## Parameters
