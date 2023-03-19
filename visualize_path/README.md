@@ -1,7 +1,7 @@
 # visualize_path
 
 ## Description
-The visualize_path package implements a node that is meant to visualize the latest 1000 detected and published limits by [lidar_curb_detection](../lidar_curb_detection/README.md), [wayfinding](../wayfinding/README.md) or [decider](../decider/README.md).
+The visualize_path package implements a node that is meant to visualize the latest 1000 published limits by [lidar_curb_detection](../lidar_curb_detection/README.md), [wayfinding](../wayfinding/README.md) or [decider](../decider/README.md).
 
 ## Concept
 Storing the received values for the left and the right limit and visualizing the latest 1000.
@@ -12,7 +12,7 @@ Storing the received values for the left and the right limit and visualizing the
         _type_: double <br>
         _default_: .2854 <br>
         _unit_: meters <br>
-    - __wheel_width__: Distance of the vertical Plane in the center of the Robot to the vertical inside Plane of the Wheels. <br>
+    - __wheel_width__: Distance of the vertical plane in the center of the robot to the vertical inside plane of the wheels. <br>
         _type_: double <br>
         _default_: .1143 <br>
         _unit_: meters <br>
@@ -31,4 +31,4 @@ Options:
 
 #### `sublaunch.visualize_path.launch.py`
 
-This launch file is thought for the Deciders [start_all.launch.py](../decider/README.md#start_alllaunchpy)
+This launch file is meant to be used by [start_all.launch.py](../decider/launch/start_all.launch.py) only.

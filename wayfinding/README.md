@@ -97,14 +97,14 @@ For a detailed description of the used filters, take a look at the post filters 
      - __distance_thr__: Threshold that tells the filter how far away another point can be to still be considered valid.  
        _type_: double  
        _default_: 0.2
-     - __quantity_check__: Amount of limits that are checked in each direction (front and behind).  
+     - __quantity_check__: Amount of limits that are checked in each direction (front and rear).  
        _type_:  int  
        _default_: 14
      - __quantity_thr__: Minimum required amount of valid points inside the __distance_thr__.  
        _type_: int  
        _default_: 15
    - __avg_dist__:
-     - __quantity_check__: Amount of limits that are checked in each direction (front and behind).  
+     - __quantity_check__: Amount of limits that are checked in each direction (front and rear).  
        _type_: int  
        _default_: 15
      - __counter_thr__: Minimum amount of distance differences that are needed to calculate the average. Lower ammounts result in invalid limits.  
@@ -114,10 +114,10 @@ For a detailed description of the used filters, take a look at the post filters 
        _type_: double  
        _default_: 0.1
    - __island__:
-     - __quantity_check__: Amount of limits that are checked in each direction (front and behind).  
+     - __quantity_check__: Amount of limits that are checked in each direction (front and rear).  
        _type_: int  
        _default_: 45
-     - __counter_thr__: The quantity of valid limits to validate the current up limit.  
+     - __counter_thr__: The quantity of valid limits to validate the current limit.  
        _type_: int  
        _default_: 40
  - __debug__:
