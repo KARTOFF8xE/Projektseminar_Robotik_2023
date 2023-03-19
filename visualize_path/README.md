@@ -10,11 +10,11 @@ Storing the received values for each left and right limit and visualizing the la
 - __robot_specific__: <br>
     - __wheel_inside__: Width of the Wheels. <br>
         _type_: double <br>
-        _default_: .2854 <br>
+        _default_: $.2854$ <br>
         _unit_: meters <br>
     - __wheel_width__: Distance of the vertical plane in the center of the robot to the vertical inside plane of the wheels. <br>
         _type_: double <br>
-        _default_: .1143 <br>
+        _default_: $.1143$ <br>
         _unit_: meters <br>
 
 ## Launch

@@ -9,7 +9,7 @@ For each datastream there is a buffer which will take in ALL published messages 
 On a set rate a method will be called that goes over all values from each buffer (starting with the oldest) and compares them. The first values which are close enough, meaning their time difference is lower then a given threshold.  
 If no pair is found then the method exists without publishing a message, otherwise the pair gets returned and merged.  
 Merging, in this case, means that if both, the cameras and the lidars, limits have e.g. a value to the left, the resulting left value would be the minimum¹ of both values.  
-When only one of both limits has a valid left value, it is chosen. If none of both limits have a valid left value it would result in 0.
+When only one of both limits has a valid left value, it is chosen. If none of both limits have a valid left value it would result in $0$.
 
 * This package only publishes valid values. <br>
 
@@ -26,15 +26,15 @@ When only one of both limits has a valid left value, it is chosen. If none of bo
        _default_: "/lidar_path_width"
     - __pub__: The topic on which the decider node should publish its results.  
       _type_: string  
-      _default_:  "/path_width"
+      _default_: "/path_width"
  - __params__:
     - __timer_delay__: The time between merging function calls.  
       _type_: int  
-      _default_: 200  
+      _default_: $200$  
       _unit_: milliseconds
     - __time_diff_thr__: The threshold for what time difference is considered "close enough".  
       _type_: double  
-      _default_: 1.0  
+      _default_: $1.0$  
       _unit_: seconds
 
 ## Launch
@@ -57,7 +57,7 @@ Options:
  - __bag_dir__: The path to the directory containing the bag files.  
    _default_: &lt;cwd&gt;
  - __bag_rate__: The rate at which to replay the bag file.  
-   _default_: 1.0
+   _default_: $1.0$
  - __flux__: The path to the flux bag (relative to bag_dir) from which to play back from.  
    _default_: ''
  - __dmc__: The path to the dmc bag (relative to the bag_dir) from which to play back from.  
