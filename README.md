@@ -9,7 +9,7 @@
    - [X] Launchfiles sollen automatisch rosbag2 starten
  - [X] über weitere Filter(-algorithmen) belesen @jkohl
  - [X] über rviz2 Funktionsweise informieren und testen @gmuck
- - [ ] Lidar-Algorithmen: @gmuck
+ - [X] Lidar-Algorithmen: @gmuck
     - [X] Bordsteinerkennung
     - [X] Test1: Bordsteinerkennung
     - [X] Fehlerbehebung nach 1. Test
@@ -46,22 +46,27 @@
     - [X] Test4: Bordsteinerkennung:
       &rarr; ist Mittlerweile eigentlich echt solide <br>
     &rarr; Stand ZwischenStandsvortrag
-    - [ ] Glättung der Grenzen Realisieren &rarr; überhaupt Sinnvoll?
- - [ ] Algorithmustests:
-   - [ ] bump_detection
-   - [ ] range_filter @jkohl
- - [ ] Vorfilter & Linienanalyse: @nzumpe
-   - [ ] Patternmatching für Wegarten testen
-   - [ ] verallg. Hough-Trafo
+    - [X] Glättung der Grenzen Realisieren &rarr; überhaupt Sinnvoll? &xrarr; war nicht sinnvoll, feature wurde entfernt
+    - [X] Visualisierungspkg schreiben und testen
+    - [X] Filter in eigenes Pkg extrahieren um es auch im wayfinding nutzen zu können
+ - [X] Algorithmustests:
+   - [X] bump_detection
+   - [X] range_filter @jkohl
+ - [X] Vorfilter & Linienanalyse: @nzumpe
+   - [X] Patternmatching für Wegarten testen
+   - [X] verallg. Hough-Trafo
         - [X] Metrik für Bewertung der Linien implementieren <br>
             - [X] Konzept für eine Bewertungsmetrik <br>
             - [X] Anpassung Winkelfilter <br>
-        - [ ] Anpassung der Vorfilter & Verknüpfung mit Metrik
-        - [ ] Testreihe Metrik
-        - [ ] Evaluierung der Tests
-        - [ ] Linienbewertung und Kriterien implementieren
-   - [ ] Linienanalyse
-        - [ ] Einbinden der Metrik in Analyse
+        - [X] Anpassung der Vorfilter & Verknüpfung mit Metrik
+        - [X] Testreihe Metrik
+        - [X] Evaluierung der Tests
+        - [X] Linienbewertung und Kriterien implementieren
+   - [X] Linienanalyse
+        - [X] Einbinden der Metrik in Analyse
+
+ - [X] Final branch aufsetzen und befüllen
+ - [X] Readmes schreiben
 
 ## Setup & Info
 
