@@ -2,9 +2,6 @@
 
 ## Packages
 
-### custom_msgs
-[->README](custom_msgs/README.md)
-
 ### decider
 [->README](decider/README.md)
 
