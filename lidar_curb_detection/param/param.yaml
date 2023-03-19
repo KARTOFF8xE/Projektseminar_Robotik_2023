@@ -5,7 +5,7 @@ lidar_curb_detection:
     #   flux:
     #   dmc:
     #     laserscan:                  # where to receive the pointcloud of the LiDAR
-    #   pub:                          # Topic for publishing the solutions
+    #   pub:                          # Topic for publishing the results
     # robot_specific:
     #   wheel_inside:                 # Width of the wheels
     #   wheel_width:                  # Distance of the vertical plane in the center of the Robot to the vertical inside plane of the wheels
